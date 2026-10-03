@@ -123,6 +123,13 @@ Invalid input returns `422` with field messages:
 | 409 | `insufficient_stock` | more than the available stock; `items` lists `variant_id` and `available_quantity` |
 | 409 | `quantity_limit` | more than 10 of one variant in the cart |
 | 409 | `quote_changed` | the order total differs from `expected_total`; `total` is the current one |
+| 403 | `admin_required` | a customer calls an `/admin` endpoint |
+| 404 | `category_not_found` / `product_not_found` / `image_not_found` | admin: unknown id |
+| 409 | `slug_already_exists` / `sku_already_exists` | admin: slug or SKU taken |
+| 409 | `variant_already_exists` / `image_already_exists` | admin: same colour+size, or same image path, on the product |
+| 409 | `inventory_below_reserved` | admin: on hand would drop below reserved units; `reserved` included |
+| 409 | `invalid_order_transition` | admin: not an allowed next status; `allowed` lists them |
+| 409 | `invalid_payment_transition` | admin: not an allowed payment change; `allowed` lists them |
 | 422 | `validation_error` | invalid input (see above) |
 | 429 | `too_many_attempts` | rate limit hit; see the `Retry-After` header |
 
@@ -297,6 +304,38 @@ tracking. Another customer's number returns `404 order_not_found`.
 Order statuses: `pending`, `confirmed`, `preparing`, `shipped`,
 `out_for_delivery`, `delivered`, `cancelled`. Payment statuses: `pending`,
 `paid`, `failed`, `refunded`.
+
+## Admin API (ADMIN only)
+
+Every route below requires `Authorization: Bearer` for an **admin** account:
+`401 authentication_required` without a token, `403 admin_required` for
+customers. Rules, state machines and the inventory policy:
+[../architecture/admin.md](../architecture/admin.md).
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/admin/overview` | dashboard `metrics`, `recent_orders`, `low_stock` |
+| `GET` | `/api/v1/admin/categories` | with `product_count` and `active_product_count` |
+| `POST` | `/api/v1/admin/categories` | `{name, slug, description?, is_active?}` → `201` |
+| `PATCH` | `/api/v1/admin/categories/{id}` | any of those fields; `is_active: false` hides it from the shop |
+| `GET` | `/api/v1/admin/products` | `q` (name/slug/SKU), `category_id`, `status=active\|inactive`, `low_stock`, `limit`, `offset`; per-product `variant_count`, `available_quantity`, `low_stock_variant_count`, `visible_in_shop` |
+| `GET` | `/api/v1/admin/products/{id}` | all fields, `images`, `variants` with `on_hand`/`reserved`/`available_quantity`/`stock_state` |
+| `POST` | `/api/v1/admin/products` | creates an **inactive** product by default → `201` |
+| `PATCH` | `/api/v1/admin/products/{id}` | partial update; `is_active` (de)activates; `compare_at_price: null` removes it |
+| `POST` | `/api/v1/admin/products/{id}/variants` | `{sku, size?, color_name, color_hex, price_override?, is_active?, on_hand?}` → `201` |
+| `PATCH` | `/api/v1/admin/variants/{id}` | partial update; `is_active: false` makes it unbuyable |
+| `POST` | `/api/v1/admin/products/{id}/images` | `{image_path, alt_text, position?, color_name?}` → `201` |
+| `PATCH` | `/api/v1/admin/images/{id}` | path, alt text, position or colour |
+| `DELETE` | `/api/v1/admin/images/{id}` | removes the metadata (not the file) |
+| `GET` | `/api/v1/admin/inventory` | `q`, `product_id`, `low_stock`, `out_of_stock`, `include_inactive`, `limit`, `offset`; returns `low_stock_threshold` |
+| `PATCH` | `/api/v1/admin/inventory/{variant_id}` | `{on_hand}` only (`reserved` is rejected) |
+| `GET` | `/api/v1/admin/orders` | all customers' orders, newest first; `q` (number, email, name, phone), `status`, `payment_status`, `city`, `limit`, `offset` |
+| `GET` | `/api/v1/admin/orders/{order_number}` | customer, items, delivery copy, `status_history` (with `internal_note`, `changed_by`), `payment_history`, `timeline`, `allowed_statuses`, `allowed_payment_statuses` |
+| `POST` | `/api/v1/admin/orders/{order_number}/status` | `{status, note?, internal_note?}`; `note` is shown to the customer |
+| `POST` | `/api/v1/admin/orders/{order_number}/payment-status` | `{payment_status, note?}` (manual/demo) |
+
+Product and variant writes return the updated product detail, so the client
+always shows the server's view. Prices and stock must be JSON integers.
 
 ## CORS
 

@@ -344,6 +344,7 @@ def test_status_changes_update_timeline_history_and_inventory(client, db_session
         "preparing",
         "shipped",
     ]
+    change_status(db_session, order, OrderStatus.out_for_delivery, None)
     change_status(db_session, order, OrderStatus.delivered, "Handed to Alex")
     stock = inventory(db_session, "CHT-BLACK-M")
     assert (stock.on_hand, stock.reserved) == (on_hand - 2, reserved - 2)

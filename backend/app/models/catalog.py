@@ -107,7 +107,8 @@ class Product(Base):
     category: Mapped[Category] = relationship(back_populates="products")
     images: Mapped[list["ProductImage"]] = relationship(
         back_populates="product",
-        order_by="ProductImage.position",
+        # Position first; id breaks ties so the gallery order is always the same.
+        order_by="(ProductImage.position, ProductImage.id)",
         cascade="all, delete-orphan",
     )
     variants: Mapped[list["ProductVariant"]] = relationship(

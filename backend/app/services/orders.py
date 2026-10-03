@@ -24,6 +24,8 @@ from app.models import (
     OrderStatus,
     OrderStatusHistory,
     PaymentMethod,
+    PaymentStatus,
+    PaymentStatusHistory,
     User,
 )
 from app.schemas.address import AddressResponse
@@ -342,23 +344,72 @@ def order_detail(order: Order) -> OrderDetail:
     )
 
 
-# --- Status changes (setup tooling; no admin dashboard yet) ------------------
+# --- Status changes -------------------------------------------------------------
+
+# The order state machine. Delivered and cancelled are terminal. An order can
+# be cancelled until it is handed to the courier (shipped); after that it can
+# only move forward.
+ORDER_TRANSITIONS: dict[OrderStatus, tuple[OrderStatus, ...]] = {
+    OrderStatus.pending: (OrderStatus.confirmed, OrderStatus.cancelled),
+    OrderStatus.confirmed: (OrderStatus.preparing, OrderStatus.cancelled),
+    OrderStatus.preparing: (OrderStatus.shipped, OrderStatus.cancelled),
+    OrderStatus.shipped: (OrderStatus.out_for_delivery,),
+    OrderStatus.out_for_delivery: (OrderStatus.delivered,),
+    OrderStatus.delivered: (),
+    OrderStatus.cancelled: (),
+}
+
+# Manual (demo) payment states. No money moves; staff record what happened.
+# Failed payments can be retried (back to pending) or settled later (paid);
+# refunded is final. A cancelled order can only be refunded.
+PAYMENT_TRANSITIONS: dict[PaymentStatus, tuple[PaymentStatus, ...]] = {
+    PaymentStatus.pending: (PaymentStatus.paid, PaymentStatus.failed),
+    PaymentStatus.failed: (PaymentStatus.pending, PaymentStatus.paid),
+    PaymentStatus.paid: (PaymentStatus.refunded,),
+    PaymentStatus.refunded: (),
+}
 
 
-def change_status(db: Session, order: Order, status: OrderStatus, note: str | None) -> None:
-    """Moves an order to a new status and keeps inventory consistent.
+def allowed_payment_statuses(order: Order) -> tuple[PaymentStatus, ...]:
+    allowed = PAYMENT_TRANSITIONS[order.payment_status]
+    if order.status == OrderStatus.cancelled:
+        return tuple(s for s in allowed if s == PaymentStatus.refunded)
+    return allowed
+
+
+def _lock(db: Session, order: Order) -> None:
+    """Locks the order row and reloads it, so concurrent changes are applied one
+    after the other and each sees the status left by the previous one."""
+    db.refresh(order, with_for_update=True)
+
+
+def change_status(
+    db: Session,
+    order: Order,
+    status: OrderStatus,
+    note: str | None = None,
+    *,
+    internal_note: str | None = None,
+    changed_by: User | None = None,
+) -> None:
+    """Moves an order along the state machine and keeps inventory consistent.
 
     delivered: the reserved units leave the warehouse (on_hand and reserved drop).
     cancelled: the reservation is released (reserved drops).
+
+    The order row is locked first, so a repeated or simultaneous request finds
+    the new status and is rejected: stock is adjusted exactly once.
     """
-    if order.status in (OrderStatus.delivered, OrderStatus.cancelled):
+    _lock(db, order)
+    if status not in ORDER_TRANSITIONS[order.status]:
+        allowed = ", ".join(s.value for s in ORDER_TRANSITIONS[order.status]) or "none"
         raise ServiceError(
             409,
-            "order_closed",
-            f"Order {order.order_number} is already {order.status.value}.",
+            "invalid_order_transition",
+            f"Order {order.order_number} can't go from {order.status.value} to "
+            f"{status.value}. Allowed next statuses: {allowed}.",
+            allowed=[s.value for s in ORDER_TRANSITIONS[order.status]],
         )
-    if status == order.status:
-        return
     if status in (OrderStatus.delivered, OrderStatus.cancelled):
         variant_ids = [item.variant_id for item in order.items if item.variant_id is not None]
         rows = db.scalars(
@@ -366,6 +417,7 @@ def change_status(db: Session, order: Order, status: OrderStatus, note: str | No
             .where(Inventory.variant_id.in_(variant_ids))
             .order_by(Inventory.variant_id)
             .with_for_update()
+            .execution_options(populate_existing=True)
         ).all()
         by_variant = {row.variant_id: row for row in rows}
         for item in order.items:
@@ -376,5 +428,45 @@ def change_status(db: Session, order: Order, status: OrderStatus, note: str | No
             if status == OrderStatus.delivered:
                 row.on_hand = max(0, row.on_hand - item.quantity)
     order.status = status
-    order.status_history.append(OrderStatusHistory(status=status, note=note))
+    order.status_history.append(
+        OrderStatusHistory(
+            status=status,
+            note=note,
+            internal_note=internal_note,
+            changed_by_user_id=changed_by.id if changed_by else None,
+        )
+    )
+    db.flush()
+
+
+def change_payment_status(
+    db: Session,
+    order: Order,
+    payment_status: PaymentStatus,
+    note: str | None = None,
+    *,
+    changed_by: User | None = None,
+) -> None:
+    """Records a manual (demo) payment-state change. No provider is contacted."""
+    _lock(db, order)
+    allowed = allowed_payment_statuses(order)
+    if payment_status not in allowed:
+        names = ", ".join(s.value for s in allowed) or "none"
+        raise ServiceError(
+            409,
+            "invalid_payment_transition",
+            f"Payment can't go from {order.payment_status.value} to {payment_status.value}"
+            f"{' on a cancelled order' if order.status == OrderStatus.cancelled else ''}. "
+            f"Allowed: {names}.",
+            allowed=[s.value for s in allowed],
+        )
+    order.payment_history.append(
+        PaymentStatusHistory(
+            from_status=order.payment_status,
+            to_status=payment_status,
+            note=note,
+            changed_by_user_id=changed_by.id if changed_by else None,
+        )
+    )
+    order.payment_status = payment_status
     db.flush()

@@ -175,8 +175,9 @@ GPS**: no courier map is shown.
   only finds the signed-in customer's own orders; anyone else's number answers
   exactly like a number that doesn't exist.
 
-There is no admin dashboard yet, so orders stay `pending` unless a developer
-moves them:
+Staff move orders along the timeline in the store admin (`/admin/orders`);
+see [admin.md](admin.md) for the allowed transitions. The same rules apply
+from the command line:
 
 ```bash
 cd backend
@@ -186,4 +187,4 @@ python -m app.db.set_order_status KW-2026-7K4M9Q shipped --note "Left the Douala
 ## Not included
 
 Real MTN MoMo / Orange Money / card payments, courier APIs, GPS tracking,
-returns, refunds, promo codes, persistent favorites and an admin dashboard.
+returns, refunds, promo codes and persistent favorites.

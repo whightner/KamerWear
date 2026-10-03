@@ -128,3 +128,23 @@ def test_create_admin_command_needs_input(monkeypatch, capsys):
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
     assert create_admin_cmd.main() == 1
     assert "Set ADMIN_EMAIL" in capsys.readouterr().err
+
+
+def test_create_admin_command_with_env(monkeypatch, capsys, db_session):
+    from sqlalchemy.orm import Session
+
+    # A real session that is closed when the command finishes, as in production.
+    monkeypatch.setattr(
+        create_admin_cmd,
+        "SessionLocal",
+        lambda: Session(bind=db_session.connection(), join_transaction_mode="create_savepoint"),
+    )
+    monkeypatch.setenv("ADMIN_EMAIL", "owner@kamerwear.cm")
+    monkeypatch.setenv("ADMIN_FIRST_NAME", "Store")
+    monkeypatch.setenv("ADMIN_LAST_NAME", "Owner")
+    monkeypatch.setenv("ADMIN_PASSWORD", NEW_PASSWORD)
+    assert create_admin_cmd.main() == 0
+    assert "Created admin account owner@kamerwear.cm" in capsys.readouterr().out
+    assert NEW_PASSWORD not in capsys.readouterr().out
+    user = db_session.scalar(select(User).where(User.email == "owner@kamerwear.cm"))
+    assert user.role == Role.admin

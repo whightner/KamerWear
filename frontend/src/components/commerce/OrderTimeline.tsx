@@ -3,7 +3,7 @@ import { formatDateTime } from "@/lib/commerce/labels";
 import type { OrderDetail } from "@/lib/commerce/types";
 
 /** Status tracking (not GPS): the delivery steps marked done, current or upcoming. */
-export function OrderTimeline({ order }: { order: OrderDetail }) {
+export function OrderTimeline({ order }: { order: Pick<OrderDetail, "timeline" | "is_cancelled"> }) {
   return (
     <div>
       {order.is_cancelled && (

@@ -45,3 +45,13 @@ export const getServerCart = cache(async (): Promise<Cart | "unavailable" | null
   if (result.ok) return result.data;
   return result.status === 401 ? null : "unavailable";
 });
+
+/**
+ * For admin pages: the signed-in ADMIN, or null for a signed-in customer (the
+ * admin layout then shows "not authorized"). Signed-out visitors are sent to
+ * /login. FastAPI enforces the same rule on every admin API call.
+ */
+export async function requireAdmin(nextPath: string): Promise<User | null> {
+  const user = await requireUser(nextPath);
+  return user.role === "admin" ? user : null;
+}

@@ -72,7 +72,10 @@ export function AddressForm({ address, defaults, onSaved, onCancel, submitLabel 
           <label htmlFor={regionId} className="mb-1.5 block text-sm font-semibold text-ink">
             Region
           </label>
+          {/* Keyed by value so it keeps the submitted region after a failed save
+              (React resets uncontrolled selects to their first default). */}
           <select
+            key={value("region", "Littoral")}
             id={regionId}
             name="region"
             required

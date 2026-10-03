@@ -2,6 +2,8 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     addresses,
+    admin_catalog,
+    admin_store,
     auth,
     cart,
     categories,
@@ -22,3 +24,5 @@ api_router.include_router(addresses.router)
 api_router.include_router(cart.router)
 api_router.include_router(checkout.router)
 api_router.include_router(orders.router)
+api_router.include_router(admin_store.router)
+api_router.include_router(admin_catalog.router)

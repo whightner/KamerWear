@@ -28,8 +28,10 @@ https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8
 
 The storefront reads a real catalog from the API. Customers can create an
 account, save delivery addresses, keep a cart in their account, check out with
-a demo payment method, and follow their orders with status tracking. Real
-payments, couriers and the AI features are not built yet; see
+a demo payment method, and follow their orders with status tracking. Store
+staff run the shop from an admin dashboard at `/admin`: products, categories,
+variants, image metadata, stock and order fulfilment. Real payments, couriers
+and the AI features are not built yet; see
 [Project status](#project-status).
 
 ## Architecture
@@ -133,15 +135,16 @@ python -m app.db.seed              # load the demo catalog (safe to run again)
 uvicorn app.main:app --reload      # http://localhost:8000
 ```
 
-Optional: create an admin account (prompts for the details; nothing is
-hard-coded, and the seed never creates users):
+Create an admin account to use the store admin at http://localhost:3000/admin
+(prompts for the details; nothing is hard-coded, and the seed never creates
+users):
 
 ```bash
 python -m app.db.create_admin
 ```
 
-Optional: move a demo order along the tracking timeline (there is no admin
-dashboard yet):
+Orders are fulfilled in the admin (`/admin/orders`). The same transitions are
+also available from the command line:
 
 ```bash
 python -m app.db.set_order_status KW-2026-7K4M9Q shipped --note "Left the Douala hub"
@@ -222,6 +225,12 @@ storefront always fetches fresh data.
   it when the order is placed. Mobile Money, Card and Cash on Delivery are
   **demo** methods: no payment is taken and no card or PIN is ever requested.
   Details: [docs/architecture/commerce.md](docs/architecture/commerce.md).
+- Store admin: `/admin` pages use the same session cookies and call
+  `/api/v1/admin/*`, which FastAPI allows only for ADMIN accounts (customers get
+  403 and a "Not authorized" page). Products, variants and categories are
+  deactivated rather than deleted; staff set physical stock (`on_hand`) but
+  never `reserved`; orders follow a fixed state machine that adjusts stock
+  exactly once. Details: [docs/architecture/admin.md](docs/architecture/admin.md).
 
 ## Project status
 
@@ -236,4 +245,5 @@ storefront always fetches fresh data.
 | Storefront reads the catalog API (no frontend mock catalog) | Done (Task 005) |
 | Customer accounts: register, login, logout, profile, password change | Done (Task 006) |
 | Addresses, saved cart, checkout (demo payments), orders and status tracking | Done (Task 007) |
-| Real payments, courier integration, admin dashboard, saved favorites, returns, AI features | Not started (future tasks) |
+| Admin dashboard: products, categories, variants, images, inventory, order fulfilment, demo payment states | Done (Task 008) |
+| Real payments, courier integration, image upload, saved favorites, returns, AI features | Not started (future tasks) |

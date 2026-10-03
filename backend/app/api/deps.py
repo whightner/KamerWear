@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.models import AuthSession, User
+from app.models import AuthSession, Role, User
 from app.services import auth
 from app.services.auth import AuthError
 
@@ -36,6 +36,20 @@ def get_authenticated(
 
 
 CurrentAuth = Annotated[Authenticated, Depends(get_authenticated)]
+
+
+def require_admin(current: CurrentAuth) -> User:
+    """Requires a signed-in ADMIN. Customers get 403 admin_required.
+
+    Every /admin endpoint depends on this; hiding links in the web app is not
+    what protects them.
+    """
+    if current.user.role != Role.admin:
+        raise AuthError(403, "admin_required", "This area is for KamerWear staff only.")
+    return current.user
+
+
+AdminUser = Annotated[User, Depends(require_admin)]
 
 
 def client_ip(request: Request) -> str:

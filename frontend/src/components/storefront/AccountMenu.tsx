@@ -2,13 +2,13 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, LogOut, User, UserRound } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, User, UserRound } from "lucide-react";
 import { logoutAction } from "@/lib/auth/actions";
 
 // Header menu for a signed-in customer: "Hi, Alex" with Account, Profile and
 // Log out. Logging out is a form POST to a Server Action, so it works even
 // before JavaScript has loaded.
-export function AccountMenu({ firstName }: { firstName: string }) {
+export function AccountMenu({ firstName, isAdmin }: { firstName: string; isAdmin: boolean }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -75,6 +75,14 @@ export function AccountMenu({ firstName }: { firstName: string }) {
                 Profile
               </Link>
             </li>
+            {isAdmin && (
+              <li>
+                <Link href="/admin" className={itemClass} onClick={() => setOpen(false)}>
+                  <LayoutDashboard className="size-4" aria-hidden="true" />
+                  Store admin
+                </Link>
+              </li>
+            )}
             <li className="mt-1 border-t border-line pt-1">
               <form action={logoutAction}>
                 <button type="submit" className={itemClass}>

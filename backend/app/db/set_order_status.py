@@ -6,7 +6,9 @@ the tracking timeline:
     python -m app.db.set_order_status KW-2026-7K4M9Q shipped --note "Left Douala hub"
 
 Statuses: confirmed, preparing, shipped, out_for_delivery, delivered, cancelled.
-Delivered and cancelled also update inventory (see services/orders.py).
+Only valid next steps are accepted (see ORDER_TRANSITIONS in services/orders.py);
+delivered and cancelled also update inventory. The admin dashboard
+(/admin/orders) does the same thing in the browser.
 """
 
 import argparse

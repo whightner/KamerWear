@@ -21,6 +21,7 @@ from app.models.order import (
     OrderStatusHistory,
     PaymentMethod,
     PaymentStatus,
+    PaymentStatusHistory,
 )
 from app.models.user import AuthSession, Role, User, UserProfile
 
@@ -38,6 +39,7 @@ __all__ = [
     "OrderStatusHistory",
     "PaymentMethod",
     "PaymentStatus",
+    "PaymentStatusHistory",
     "Product",
     "ProductImage",
     "ProductVariant",

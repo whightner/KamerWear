@@ -28,6 +28,9 @@ from app.db.seed import seed_catalog
 from app.db.session import get_db
 from app.main import app
 
+# Shared fixtures for the admin tests (admin, customer, placed_order).
+pytest_plugins = ["tests.admin"]
+
 
 def _test_database_url():
     url = make_url(os.environ.get("TEST_DATABASE_URL") or settings.database_url)

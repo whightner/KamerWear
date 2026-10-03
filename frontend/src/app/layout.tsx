@@ -5,6 +5,7 @@ import { CartNotice } from "@/components/store/CartNotice";
 import { StoreProvider } from "@/components/store/StoreProvider";
 import { Footer } from "@/components/storefront/Footer";
 import { Header } from "@/components/storefront/Header";
+import { StorefrontOnly } from "@/components/storefront/StorefrontOnly";
 import { getCurrentUser, getServerCart } from "@/lib/auth/session";
 import "./globals.css";
 
@@ -35,14 +36,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <StoreProvider signedIn={!!user} serverCart={user ? serverCart : null}>
-          <Header
-            account={user ? { firstName: user.profile.first_name } : null}
-          />
-          <Suspense fallback={null}>
-            <CartNotice />
-          </Suspense>
+          <StorefrontOnly>
+            <Header
+              account={
+                user
+                  ? { firstName: user.profile.first_name, isAdmin: user.role === "admin" }
+                  : null
+              }
+            />
+            <Suspense fallback={null}>
+              <CartNotice />
+            </Suspense>
+          </StorefrontOnly>
           <main className="flex-1">{children}</main>
-          <Footer />
+          <StorefrontOnly>
+            <Footer />
+          </StorefrontOnly>
         </StoreProvider>
       </body>
     </html>

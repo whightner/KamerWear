@@ -78,10 +78,12 @@ def main() -> int:
         password = _ask("ADMIN_PASSWORD", "Password (min. 10 characters): ", secret=True)
         with SessionLocal() as db:
             user = create_admin(db, email, password, first_name, last_name)
+            # Read while the session is open (attributes expire on commit).
+            message = f"Created admin account {user.email} (id {user.id})."
     except AdminCreationError as exc:
         print(f"Admin not created: {exc}", file=sys.stderr)
         return 1
-    print(f"Created admin account {user.email} (id {user.id}).")
+    print(message)
     return 0
 
 

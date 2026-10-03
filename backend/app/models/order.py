@@ -117,6 +117,11 @@ class Order(Base):
         cascade="all, delete-orphan",
         order_by="OrderStatusHistory.id",
     )
+    payment_history: Mapped[list["PaymentStatusHistory"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+        order_by="PaymentStatusHistory.id",
+    )
 
     @property
     def item_count(self) -> int:
@@ -160,7 +165,32 @@ class OrderStatusHistory(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
     status: Mapped[OrderStatus] = mapped_column(_enum(OrderStatus, "order_status"))
+    # Shown to the customer on their order page.
     note: Mapped[str | None] = mapped_column(String(255))
+    # Staff-only note (e.g. "Customer unreachable"), never sent to customers.
+    internal_note: Mapped[str | None] = mapped_column(String(500))
+    # The admin who made the change; null for the customer's own checkout.
+    changed_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     order: Mapped[Order] = relationship(back_populates="status_history")
+
+
+class PaymentStatusHistory(Base):
+    """Manual (demo) payment-status changes made by staff. No provider is involved."""
+
+    __tablename__ = "payment_status_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    from_status: Mapped[PaymentStatus] = mapped_column(_enum(PaymentStatus, "from_status"))
+    to_status: Mapped[PaymentStatus] = mapped_column(_enum(PaymentStatus, "to_status"))
+    note: Mapped[str | None] = mapped_column(String(500))
+    changed_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    order: Mapped[Order] = relationship(back_populates="payment_history")

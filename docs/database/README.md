@@ -29,7 +29,7 @@ categories ──< products ──< product_images
 | --- | --- | --- |
 | `categories` | Shoes, Clothing, Accessories | unique `slug`; `is_active` hides a category and its products |
 | `products` | One catalog item | unique `slug`; `gender` is `men`/`women`/`unisex` (a field, not a category); `base_price` and `compare_at_price` are integer XAF; `rating_average`/`review_count` are seeded demo data |
-| `product_images` | Ordered photos | `image_path` points to a frontend static file (`/images/products/...`); `position` sets the order; optional `color_name` links a photo to a colour |
+| `product_images` | Ordered photos | `image_path` points to a frontend static file (`/images/products/...`); `position` sets the order (ties broken by id); optional `color_name` links a photo to a colour |
 | `product_variants` | Sellable colour + size | unique `sku` (e.g. `UR02-BLACK-43`); `size` is null for one-size products; `price_override` is optional, otherwise the product price applies |
 | `inventory` | Stock for one variant | `on_hand` and `reserved`; available = `on_hand - reserved`, never reported below 0 |
 
@@ -74,9 +74,14 @@ users ──< addresses
 | `cart_items` | Cart lines | `variant_id` + `quantity` only (`quantity > 0`, unique per cart and variant); prices and names are never stored here |
 | `orders` | Placed orders | random unique `order_number` (`KW-2026-7K4M9Q`); `status`, `payment_status`, `payment_method` (check constraints); integer XAF `subtotal`, `delivery_fee`, `discount_total`, `total`; `delivery_*` columns copy the address; unique (`user_id`, `idempotency_key`) |
 | `order_items` | Purchase-time line snapshots | product name, slug, SKU, size, colour, image path, `unit_price`, `quantity`, `line_total`; `product_id`/`variant_id` kept for reference (`SET NULL` if ever deleted) |
-| `order_status_history` | Status events | `status`, optional `note`, `created_at`; first row written when the order is placed |
+| `order_status_history` | Status events | `status`, optional customer-visible `note`, staff-only `internal_note`, `changed_by_user_id` (the admin; null for checkout), `created_at`; first row written when the order is placed |
+| `payment_status_history` | Manual (demo) payment changes | `from_status`, `to_status`, optional staff `note`, `changed_by_user_id`, `created_at` |
 
-Placing an order reserves stock (`inventory.reserved += quantity`); see
+Placing an order reserves stock (`inventory.reserved += quantity`); delivering
+moves it out (`on_hand` and `reserved` drop) and cancelling releases it
+(`reserved` drops). Staff change only `on_hand`, never below `reserved`. See
+[../architecture/admin.md](../architecture/admin.md) for the order state
+machine, and
 [../architecture/commerce.md](../architecture/commerce.md) for the inventory
 policy and row locking.
 

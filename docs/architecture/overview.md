@@ -33,6 +33,8 @@ Figma product board.
   API from the server; see [auth.md](auth.md).
 - Shows carts, checkout totals and orders exactly as the API returns them; the
   API computes prices, fees, stock and totals. See [commerce.md](commerce.md).
+- Hosts the store admin under `/admin`; the API decides who is an admin.
+  See [admin.md](admin.md).
 
 ### REST API
 

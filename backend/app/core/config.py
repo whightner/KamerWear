@@ -14,6 +14,10 @@ API_VERSION = "0.1.0"
 API_V1_PREFIX = "/api/v1"
 JWT_ALGORITHM = "HS256"
 
+# A variant with this many units available or fewer counts as low stock (admin
+# dashboard and filters). Matches the storefront's "Only N left" label.
+LOW_STOCK_THRESHOLD = 5
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
