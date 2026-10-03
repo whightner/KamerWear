@@ -26,17 +26,14 @@ interface HeaderLinkProps {
   label: string;
   href: string;
   icon: LucideIcon;
-  /** Pages that don't exist yet are not prefetched. */
-  prefetch?: false;
   count?: number;
   ariaLabel?: string;
 }
 
-function HeaderLink({ label, href, icon: Icon, prefetch, count, ariaLabel }: HeaderLinkProps) {
+function HeaderLink({ label, href, icon: Icon, count, ariaLabel }: HeaderLinkProps) {
   return (
     <Link
       href={href}
-      prefetch={prefetch}
       aria-label={ariaLabel ?? (count ? `${label}, ${count} items` : label)}
       className="relative flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-medium text-ink hover:bg-cream sm:px-3"
     >
@@ -92,6 +89,7 @@ export function Header({ account }: { account: HeaderAccount | null }) {
           <Form
             action="/shop"
             role="search"
+            aria-label="Site search"
             className="hidden h-11 min-w-0 max-w-2xl flex-1 items-center rounded-lg border border-line bg-cream/60 pl-3 focus-within:border-ink md:flex"
           >
             <Search className="size-4 shrink-0 text-muted" aria-hidden="true" />
@@ -126,8 +124,7 @@ export function Header({ account }: { account: HeaderAccount | null }) {
             aria-label="Account and cart"
             className="ml-auto flex items-center sm:gap-1"
           >
-            {/* Future route: order tracking arrives in a later task. */}
-            <HeaderLink label="Track order" href="/orders/track" icon={Package} prefetch={false} />
+            <HeaderLink label="Track order" href="/orders/track" icon={Package} />
             {account ? (
               <AccountMenu firstName={account.firstName} />
             ) : (

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { registerAction, type FormState } from "@/lib/auth/actions";
+import { GuestCartField } from "./GuestCartField";
 import { FormMessage, PasswordField, SubmitButton, TextField } from "./fields";
 
 export function RegisterForm({ next }: { next: string }) {
@@ -12,6 +13,7 @@ export function RegisterForm({ next }: { next: string }) {
   return (
     <form action={formAction} noValidate className="space-y-5">
       <input type="hidden" name="next" value={next} />
+      <GuestCartField />
       <FormMessage error={state.error} />
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField

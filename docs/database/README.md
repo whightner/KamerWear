@@ -54,8 +54,31 @@ users ──── user_profiles (one per user)
 
 Expired and revoked sessions are kept; a cleanup job can come later.
 
-Favorites and cart are still kept in the browser only; they are not stored
-per account yet.
+Favorites are still kept in the browser only.
+
+## Commerce schema
+
+```
+users ──< addresses
+  │
+  ├──── carts (one per user) ──< cart_items >── product_variants
+  │
+  └──< orders ──< order_items          (snapshots; variant/product ids kept for reference)
+          └───< order_status_history
+```
+
+| Table | Purpose | Notes |
+| --- | --- | --- |
+| `addresses` | Saved delivery addresses | `label`, `recipient_name`, `phone`, `country_code` (`CM`), `region`, `city`, `quarter`, `street_or_landmark`, optional `latitude`/`longitude`; partial unique index `uq_addresses_user_id_default` allows one default per user |
+| `carts` | One saved cart per customer | unique `user_id` |
+| `cart_items` | Cart lines | `variant_id` + `quantity` only (`quantity > 0`, unique per cart and variant); prices and names are never stored here |
+| `orders` | Placed orders | random unique `order_number` (`KW-2026-7K4M9Q`); `status`, `payment_status`, `payment_method` (check constraints); integer XAF `subtotal`, `delivery_fee`, `discount_total`, `total`; `delivery_*` columns copy the address; unique (`user_id`, `idempotency_key`) |
+| `order_items` | Purchase-time line snapshots | product name, slug, SKU, size, colour, image path, `unit_price`, `quantity`, `line_total`; `product_id`/`variant_id` kept for reference (`SET NULL` if ever deleted) |
+| `order_status_history` | Status events | `status`, optional `note`, `created_at`; first row written when the order is placed |
+
+Placing an order reserves stock (`inventory.reserved += quantity`); see
+[../architecture/commerce.md](../architecture/commerce.md) for the inventory
+policy and row locking.
 
 ## Seed data
 
@@ -70,7 +93,10 @@ by slug or SKU and updated, so running it again never duplicates data.
 Inventory is reset to the demo stock levels (low stock, sold-out sizes and one
 out-of-stock product, as in the storefront).
 
-The seed never creates users. Create an admin with
+Re-running the seed resets inventory to the demo levels, which also drops
+stock reserved by existing orders. Use it on development databases only.
+
+The seed never creates users or orders. Create an admin with
 `python -m app.db.create_admin` (see [../architecture/auth.md](../architecture/auth.md)).
 
 ## Migrations

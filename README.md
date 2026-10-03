@@ -26,9 +26,10 @@ https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8
 
 ### Current scope
 
-The storefront reads a real catalog from the API, keeps the cart and favorites
-in the browser, and customers can create an account, log in and manage their
-profile. Checkout, orders and the AI features are not built yet; see
+The storefront reads a real catalog from the API. Customers can create an
+account, save delivery addresses, keep a cart in their account, check out with
+a demo payment method, and follow their orders with status tracking. Real
+payments, couriers and the AI features are not built yet; see
 [Project status](#project-status).
 
 ## Architecture
@@ -77,9 +78,9 @@ KamerWear/
 │   │   ├── api/v1/           REST endpoints, mounted under /api/v1
 │   │   ├── db/               SQLAlchemy base and session
 │   │   ├── core/             settings, password hashing/JWT, rate limiting
-│   │   ├── models/           database models (catalog, users)
+│   │   ├── models/           database models (catalog, users, addresses, carts, orders)
 │   │   ├── schemas/          request/response models
-│   │   ├── services/         business logic (catalog, auth)
+│   │   ├── services/         business logic (catalog, auth, cart, orders, delivery fees)
 │   │   └── main.py           FastAPI application
 │   ├── alembic/              migrations
 │   ├── tests/
@@ -127,7 +128,7 @@ pip install -r requirements.txt
 # and a random JWT_SECRET_KEY (see the comment in the file for a command).
 cp .env.example .env               # Windows: copy .env.example .env
 
-alembic upgrade head               # create the catalog and account tables
+alembic upgrade head               # create the catalog, account and order tables
 python -m app.db.seed              # load the demo catalog (safe to run again)
 uvicorn app.main:app --reload      # http://localhost:8000
 ```
@@ -137,6 +138,13 @@ hard-coded, and the seed never creates users):
 
 ```bash
 python -m app.db.create_admin
+```
+
+Optional: move a demo order along the tracking timeline (there is no admin
+dashboard yet):
+
+```bash
+python -m app.db.set_order_status KW-2026-7K4M9Q shipped --note "Left the Douala hub"
 ```
 
 Useful URLs:
@@ -206,6 +214,14 @@ storefront always fetches fresh data.
   header; browser JavaScript never sees them. `/account` and
   `/account/profile` require a session. Details, including CSRF and token
   refresh: [docs/architecture/auth.md](docs/architecture/auth.md).
+- Cart and checkout: a signed-in customer's cart is saved in PostgreSQL; a
+  guest's cart lives in browser memory and is merged into the account at
+  login (checkout requires an account). FastAPI calculates every price, the
+  delivery fee (demo rule: Douala 1 500, Yaoundé 2 000, Bafoussam 2 500, other
+  cities 3 500 FCFA) and the total, re-checks stock with row locks and reserves
+  it when the order is placed. Mobile Money, Card and Cash on Delivery are
+  **demo** methods: no payment is taken and no card or PIN is ever requested.
+  Details: [docs/architecture/commerce.md](docs/architecture/commerce.md).
 
 ## Project status
 
@@ -219,4 +235,5 @@ storefront always fetches fresh data.
 | Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004) |
 | Storefront reads the catalog API (no frontend mock catalog) | Done (Task 005) |
 | Customer accounts: register, login, logout, profile, password change | Done (Task 006) |
-| Checkout, payments, addresses, order tracking, saved favorites/cart, etc. | Not started (future tasks) |
+| Addresses, saved cart, checkout (demo payments), orders and status tracking | Done (Task 007) |
+| Real payments, courier integration, admin dashboard, saved favorites, returns, AI features | Not started (future tasks) |

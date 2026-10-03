@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { loginAction, type FormState } from "@/lib/auth/actions";
+import { GuestCartField } from "./GuestCartField";
 import { FormMessage, PasswordField, SubmitButton, TextField } from "./fields";
 
 export function LoginForm({ next, notice }: { next: string; notice?: string }) {
@@ -12,6 +13,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
   return (
     <form action={formAction} noValidate className="space-y-5">
       <input type="hidden" name="next" value={next} />
+      <GuestCartField />
       {state.error ? (
         <FormMessage error={state.error} />
       ) : (

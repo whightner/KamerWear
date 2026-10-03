@@ -94,6 +94,7 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
         <Form
           action="/shop"
           role="search"
+          aria-label="Search this catalog"
           className="flex h-10 w-full max-w-sm items-center rounded-lg border border-line bg-white pl-3 focus-within:border-ink"
         >
           <Search className="size-4 shrink-0 text-muted" aria-hidden="true" />

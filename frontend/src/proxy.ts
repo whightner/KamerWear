@@ -10,8 +10,9 @@ import {
 // Runs before every page request (and Server Action) to keep the session fresh:
 // when the 15-minute access token is missing or about to expire, it is renewed
 // with the refresh token, so pages render with a valid token. It also sends
-// signed-out visitors of /account pages to /login. The pages still check the
-// user themselves (requireUser); this is only the fast first check.
+// signed-out visitors of account, checkout and order pages to /login. The
+// pages still check the user themselves (requireUser); this is only the fast
+// first check.
 
 const REFRESH_MARGIN_SECONDS = 30;
 
@@ -32,8 +33,10 @@ function refreshOnce(refreshToken: string) {
   return pending;
 }
 
+const PROTECTED = ["/account", "/checkout", "/orders"];
+
 function isProtected(pathname: string) {
-  return pathname === "/account" || pathname.startsWith("/account/");
+  return PROTECTED.some((base) => pathname === base || pathname.startsWith(`${base}/`));
 }
 
 function loginRedirect(request: NextRequest, reason?: string) {

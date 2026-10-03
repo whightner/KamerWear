@@ -9,7 +9,7 @@ export function Hero() {
       <Container>
         <div className="grid overflow-hidden rounded-2xl bg-sand lg:grid-cols-12">
           <div className="flex flex-col justify-center px-8 py-12 lg:col-span-5 lg:px-14 lg:py-16">
-            <p className="text-xs font-bold tracking-[0.25em] text-deal">
+            <p className="text-xs font-bold tracking-[0.25em] text-deal-dark">
               NEW SEASON • 2026
             </p>
             <h1

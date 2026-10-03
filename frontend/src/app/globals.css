@@ -7,8 +7,11 @@
   --color-ink: #1b1a19;
   --color-muted: #6b645c;
   --color-line: #e6dfd4;
-  --color-deal: #e0482a;
-  --color-deal-dark: #b83519;
+  /* Deal red, darkened slightly from #e0482a (same hue) so text and white
+     labels meet WCAG AA contrast (5.2:1 on white, 4.5:1 on deal-soft). */
+  --color-deal: #c7391d;
+  /* Hover/pressed shade; also used for small red text on sand/cream. */
+  --color-deal-dark: #a32f17;
   --color-deal-soft: #fdece7;
   --color-gold: #f2b233;
   --color-gold-soft: #fdf4dc;

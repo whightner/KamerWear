@@ -9,6 +9,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { refresh } from "next/cache";
+import { mergeGuestCart, withCartNotice } from "@/lib/commerce/guest-cart";
 import { authApi, type ApiFailure, type AuthTokens } from "./api";
 import {
   ACCESS_COOKIE,
@@ -125,7 +126,8 @@ export async function loginAction(
 
   await endCurrentSession(); // signing in again replaces any previous session
   await setSession(result.data);
-  redirect(next);
+  const adjusted = await mergeGuestCart(result.data.access_token, formData.get("guest_cart"));
+  redirect(adjusted ? withCartNotice(next) : next);
 }
 
 export async function registerAction(
@@ -171,7 +173,8 @@ export async function registerAction(
 
   await endCurrentSession();
   await setSession(result.data);
-  redirect(next);
+  const adjusted = await mergeGuestCart(result.data.access_token, formData.get("guest_cart"));
+  redirect(adjusted ? withCartNotice(next) : next);
 }
 
 export async function logoutAction() {

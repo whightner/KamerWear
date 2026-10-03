@@ -1,6 +1,8 @@
 import "server-only";
 
-import { apiUrl } from "@/lib/api-config";
+import { call } from "@/lib/api/server";
+
+export type { ApiFailure, ApiResult } from "@/lib/api/server";
 
 // Server-side calls to the FastAPI auth/account endpoints. Only used by Server
 // Actions, the proxy and Server Components: tokens never reach browser JS.
@@ -28,64 +30,6 @@ export interface AuthTokens {
   refresh_token: string;
   access_token_expires_in: number;
   refresh_token_expires_in: number;
-}
-
-export interface ApiFailure {
-  ok: false;
-  status: number;
-  /** Backend error code, or "unavailable" when the API could not be reached. */
-  code: string;
-  message: string;
-  fields: Record<string, string>;
-}
-
-export type ApiResult<T> = { ok: true; data: T } | ApiFailure;
-
-async function call<T>(
-  path: string,
-  init: { method?: string; body?: unknown; accessToken?: string; clientIp?: string | null },
-): Promise<ApiResult<T>> {
-  const headers: Record<string, string> = { Accept: "application/json" };
-  if (init.body !== undefined) headers["Content-Type"] = "application/json";
-  if (init.accessToken) headers.Authorization = `Bearer ${init.accessToken}`;
-  // Lets the API rate-limit by the real browser IP (it only trusts this from us).
-  if (init.clientIp) headers["X-Forwarded-For"] = init.clientIp;
-
-  let response: Response;
-  try {
-    response = await fetch(apiUrl(path), {
-      method: init.method ?? "GET",
-      headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
-      cache: "no-store",
-    });
-  } catch (cause) {
-    if (!(cause instanceof TypeError)) throw cause;
-    return {
-      ok: false,
-      status: 0,
-      code: "unavailable",
-      message: "We couldn't reach KamerWear right now. Please try again.",
-      fields: {},
-    };
-  }
-
-  if (response.status === 204) return { ok: true, data: undefined as T };
-  const body: unknown = await response.json().catch(() => null);
-  if (response.ok) return { ok: true, data: body as T };
-
-  const detail = (body as { detail?: unknown } | null)?.detail;
-  const structured =
-    detail && typeof detail === "object" && "code" in detail
-      ? (detail as { code: string; message?: string; fields?: Record<string, string> })
-      : null;
-  return {
-    ok: false,
-    status: response.status,
-    code: structured?.code ?? "error",
-    message: structured?.message ?? "Something went wrong. Please try again.",
-    fields: structured?.fields ?? {},
-  };
 }
 
 export const authApi = {

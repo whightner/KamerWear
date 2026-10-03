@@ -21,6 +21,7 @@ import { ProductCard } from "@/components/storefront/ProductCard";
 import { formatXaf } from "@/lib/format";
 import {
   isShoe as isShoeProduct,
+  productHref,
   productLabel,
   stockStatus,
 } from "@/lib/products";
@@ -43,13 +44,14 @@ function galleryFor(images: ProductImage[], colorName: string): ProductImage[] {
 
 export function ProductDetail({ product, similar }: ProductDetailProps) {
   const router = useRouter();
-  const { addToCart } = useStore();
+  const { addToCart, cartPending } = useStore();
   const [colorName, setColorName] = useState(product.colors[0]?.name ?? "");
   const [imageIndex, setImageIndex] = useState(0);
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
   const [confirmation, setConfirmation] = useState("");
+  const [cartError, setCartError] = useState("");
   const [showSimilar, setShowSimilar] = useState(false);
   const similarRef = useRef<HTMLElement>(null);
   const sizeGroupRef = useRef<HTMLFieldSetElement>(null);
@@ -121,8 +123,8 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
     setSizeError(false);
   }
 
-  /** Adds the selected variant to the cart; returns false if nothing was added. */
-  function addSelection(): boolean {
+  /** Adds the selected variant to the cart; resolves false if nothing was added. */
+  async function addSelection(): Promise<boolean> {
     if (needsSize && !size) {
       setSizeError(true);
       sizeGroupRef.current
@@ -132,7 +134,9 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
     }
     if (!selected || remaining <= 0) return false;
     const image = gallery[0];
-    addToCart({
+    setConfirmation("");
+    setCartError("");
+    const result = await addToCart({
       variantId: selected.id,
       sku: selected.sku,
       productId: product.id,
@@ -146,6 +150,14 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
       availableQuantity: selected.available_quantity,
       quantity: effectiveQuantity,
     });
+    if (!result.ok) {
+      if (result.code === "session_expired") {
+        router.push(`/login?next=${encodeURIComponent(productHref(product))}&reason=expired`);
+      } else {
+        setCartError(result.message);
+      }
+      return false;
+    }
     const parts = [
       selected.color_name,
       selected.size && (isShoe ? `EU ${selected.size}` : selected.size),
@@ -157,9 +169,10 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
     return true;
   }
 
-  function buyNow() {
-    // No checkout yet: Buy Now adds the item and opens the cart.
-    if (addSelection()) router.push("/cart");
+  async function buyNow() {
+    // Buy Now adds the item and goes to checkout (guests log in first; their
+    // cart is merged into their account).
+    if (await addSelection()) router.push("/checkout");
   }
 
   return (
@@ -414,7 +427,8 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
               <button
                 type="button"
                 onClick={addSelection}
-                disabled={!canBuy}
+                disabled={!canBuy || cartPending}
+                aria-busy={cartPending}
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:bg-muted/50"
               >
                 <ShoppingBag className="size-4" aria-hidden="true" />
@@ -428,7 +442,7 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
                 <button
                   type="button"
                   onClick={buyNow}
-                  disabled={!canBuy}
+                  disabled={!canBuy || cartPending}
                   className="flex h-12 items-center justify-center gap-2 rounded-lg bg-deal text-sm font-semibold text-white hover:bg-deal-dark disabled:cursor-not-allowed disabled:bg-muted/50"
                 >
                   <Zap className="size-4" aria-hidden="true" />
@@ -436,6 +450,11 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
                 </button>
                 <FavoriteButton product={product} variant="labelled" />
               </div>
+              {cartError && (
+                <p role="alert" className="text-sm font-medium text-deal-dark">
+                  {cartError}
+                </p>
+              )}
               <p role="status" className="min-h-5 text-sm text-fit-dark">
                 {confirmation && (
                   <>

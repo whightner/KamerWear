@@ -31,6 +31,8 @@ Figma product board.
 - Reads the API base URL from `NEXT_PUBLIC_API_URL`.
 - Holds the customer's auth tokens in HttpOnly cookies and forwards them to the
   API from the server; see [auth.md](auth.md).
+- Shows carts, checkout totals and orders exactly as the API returns them; the
+  API computes prices, fees, stock and totals. See [commerce.md](commerce.md).
 
 ### REST API
 

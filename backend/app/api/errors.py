@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.services.auth import AuthError
+from app.services.errors import ServiceError
 
 
 def api_error(
@@ -38,6 +39,13 @@ def register_error_handlers(app: FastAPI) -> None:
             status_code=exc.status_code,
             content={"detail": {"code": exc.code, "message": exc.message}},
             headers=headers,
+        )
+
+    @app.exception_handler(ServiceError)
+    async def service_error(request: Request, exc: ServiceError) -> JSONResponse:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": {"code": exc.code, "message": exc.message, **exc.extra}},
         )
 
     @app.exception_handler(RequestValidationError)

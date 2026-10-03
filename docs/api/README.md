@@ -108,13 +108,21 @@ Invalid input returns `422` with field messages:
 | Status | Code | When |
 | --- | --- | --- |
 | 400 | `invalid_current_password` | password change with a wrong current password |
+| 400 | `cart_empty` | placing an order with an empty cart |
 | 401 | `authentication_required` | no `Authorization: Bearer` header |
 | 401 | `invalid_token` | access token expired, malformed, forged, or its session was revoked |
 | 401 | `invalid_credentials` | wrong email or password (same answer for both) |
 | 401 | `invalid_refresh_token` | refresh token expired, revoked, reused or malformed |
 | 403 | `inactive_account` | the account is deactivated |
 | 404 | `product_not_found` | unknown product slug |
+| 404 | `address_not_found` | unknown address, or another customer's |
+| 404 | `variant_not_found` | unknown or no-longer-sold product variant |
+| 404 | `cart_item_not_found` | unknown cart line, or another customer's |
+| 404 | `order_not_found` | unknown order number, or another customer's |
 | 409 | `email_already_registered` | registration with an existing email (case-insensitive) |
+| 409 | `insufficient_stock` | more than the available stock; `items` lists `variant_id` and `available_quantity` |
+| 409 | `quantity_limit` | more than 10 of one variant in the cart |
+| 409 | `quote_changed` | the order total differs from `expected_total`; `total` is the current one |
 | 422 | `validation_error` | invalid input (see above) |
 | 429 | `too_many_attempts` | rate limit hit; see the `Retry-After` header |
 
@@ -173,6 +181,122 @@ Email, role and status are read-only; sending them returns `422`.
 
 `{ "current_password": "...", "new_password": "..." }`. Signs out every other
 session of the user; the current one stays valid.
+
+## Addresses, cart, checkout and orders
+
+All of these require `Authorization: Bearer`. The customer always comes from
+the token; requests never carry a `user_id`, price, fee or total (unknown fields
+are rejected with `422`). Design and rules:
+[../architecture/commerce.md](../architecture/commerce.md).
+
+### Addresses
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/addresses` | own addresses, default first |
+| `POST` | `/api/v1/addresses` | `201`; first address becomes the default |
+| `PATCH` | `/api/v1/addresses/{id}` | fields sent are changed; `is_default: true` moves the default |
+| `DELETE` | `/api/v1/addresses/{id}` | `204`; orders keep their own copy |
+
+```json
+{ "label": "Home", "recipient_name": "Alex Tadji", "phone": "+237 6 99 11 22 33",
+  "region": "Littoral", "city": "Douala", "quarter": "Bonamoussadi",
+  "street_or_landmark": "Near Tradex, blue gate", "is_default": true }
+```
+
+`region` must be one of the ten regions of Cameroon. `latitude`/`longitude`
+are optional. The response adds `id`, `country_code` (`"CM"`) and timestamps.
+
+### Cart
+
+| Method | Path | Body |
+| --- | --- | --- |
+| `GET` | `/api/v1/cart` | — |
+| `POST` | `/api/v1/cart/items` | `{ "variant_id": 12, "quantity": 1 }` (adds to an existing line) |
+| `PATCH` | `/api/v1/cart/items/{cart_item_id}` | `{ "quantity": 2 }` |
+| `DELETE` | `/api/v1/cart/items/{cart_item_id}` | — |
+| `DELETE` | `/api/v1/cart` | — (empties the cart) |
+| `POST` | `/api/v1/cart/merge` | `{ "items": [{ "variant_id": 12, "quantity": 2 }] }` (guest cart after login) |
+
+Every cart call returns the whole cart, priced from the catalog:
+
+```json
+{ "items": [{
+    "cart_item_id": 7, "quantity": 2,
+    "variant": { "id": 12, "sku": "CHT-BLACK-M", "size": "M", "color_name": "Black" },
+    "product": { "id": 3, "slug": "core-heavy-tee", "name": "Core Heavy Tee",
+                 "category_slug": "clothing",
+                 "image": { "image_path": "/images/products/...", "alt_text": "..." } },
+    "unit_price": 5500, "line_total": 11000, "available_quantity": 4, "issue": null }],
+  "subtotal": 11000, "item_count": 2, "has_issues": false }
+```
+
+`issue` explains why a line can't be ordered right now (sold out, fewer left
+than in the cart, no longer sold). Merge returns `{ "cart": …, "adjustments":
+[{ "variant_id", "product_name", "requested", "added", "message" }] }`.
+
+### `POST /api/v1/checkout/quote`
+
+`{ "address_id": 4, "payment_method": "mobile_money" }` (both optional) →
+
+```json
+{ "items": [ …cart lines… ], "item_count": 3, "subtotal": 25500,
+  "delivery_fee": 1500, "discount_total": 0, "total": 27000,
+  "address": { …address… }, "payment_method": "mobile_money",
+  "payment_note": "Demo payment — real payment integration is not enabled. …",
+  "issues": [], "can_place_order": true }
+```
+
+`delivery_fee` is `null` until an address is chosen. Nothing is reserved.
+
+### `POST /api/v1/orders` → `201`
+
+Header `Idempotency-Key: <8–64 letters, digits, - or _>` (required; e.g. a UUID
+made once per checkout). Body:
+
+```json
+{ "address_id": 4, "payment_method": "cash_on_delivery", "expected_total": 27000 }
+```
+
+`payment_method`: `mobile_money`, `card` or `cash_on_delivery` (all demo; no
+payment is processed). `expected_total` is optional. Returns the order detail
+(below). Repeating the request with the same key returns the same order with
+`200`.
+
+### `GET /api/v1/orders`
+
+Own orders, newest first: `{ "items": [...], "total": 2, "limit": 20, "offset": 0 }`
+with `order_number`, `created_at`, `status`, `payment_status`, `payment_method`,
+`total`, `item_count` per order. `limit` 1–100, `offset` ≥ 0.
+
+### `GET /api/v1/orders/{order_number}`
+
+One own order (case-insensitive number); used for the order page and for
+tracking. Another customer's number returns `404 order_not_found`.
+
+```json
+{ "order_number": "KW-2026-7K4M9Q", "created_at": "…", "status": "pending",
+  "payment_status": "pending", "payment_method": "cash_on_delivery",
+  "subtotal": 25500, "delivery_fee": 1500, "discount_total": 0, "total": 27000,
+  "item_count": 3, "payment_note": "Pay the courier in cash when your order arrives.",
+  "delivery": { "label": "Home", "recipient_name": "Alex Tadji", "phone": "+237699112233",
+                "country_code": "CM", "region": "Littoral", "city": "Douala",
+                "quarter": "Bonamoussadi", "landmark": "Near Tradex, blue gate",
+                "latitude": null, "longitude": null },
+  "items": [{ "product_id": 3, "variant_id": 12, "product_name": "Core Heavy Tee",
+              "product_slug": "core-heavy-tee", "sku": "CHT-BLACK-M", "size": "M",
+              "color_name": "Black", "image_path": "…", "unit_price": 5500,
+              "quantity": 2, "line_total": 11000 }],
+  "status_history": [{ "status": "pending", "note": "Order placed.", "created_at": "…" }],
+  "timeline": [{ "status": "pending", "label": "Order placed", "state": "current",
+                 "reached_at": "…" }, { "status": "confirmed", "label": "Confirmed",
+                 "state": "upcoming", "reached_at": null }, "…"],
+  "is_cancelled": false }
+```
+
+Order statuses: `pending`, `confirmed`, `preparing`, `shipped`,
+`out_for_delivery`, `delivered`, `cancelled`. Payment statuses: `pending`,
+`paid`, `failed`, `refunded`.
 
 ## CORS
 

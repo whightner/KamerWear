@@ -158,6 +158,7 @@ export default async function ProductPage({
             <div>
               <p
                 className="flex gap-0.5"
+                role="img"
                 aria-label={`${product.rating_average.toFixed(1)} out of 5 stars`}
               >
                 {[1, 2, 3, 4, 5].map((n) => (

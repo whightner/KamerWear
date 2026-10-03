@@ -34,9 +34,9 @@ export default async function AccountPage() {
     },
     {
       title: "Orders",
-      description: "Order history and tracking will appear here.",
+      description: "Your order history and delivery tracking.",
       icon: Package,
-      badge: "Coming soon",
+      href: "/orders",
     },
     {
       title: "Fit Profile",
@@ -48,7 +48,7 @@ export default async function AccountPage() {
       title: "Addresses",
       description: "Delivery addresses across Cameroon.",
       icon: MapPin,
-      badge: "Coming soon",
+      href: "/account/addresses",
     },
   ];
 
