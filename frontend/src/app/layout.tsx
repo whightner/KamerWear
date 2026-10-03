@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { StoreProvider } from "@/components/store/StoreProvider";
 import { Footer } from "@/components/storefront/Footer";
 import { Header } from "@/components/storefront/Header";
+import { getCurrentUser } from "@/lib/auth/session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,7 +22,10 @@ export const metadata: Metadata = {
     "Shop shoes, clothes, streetwear and accessories with flash deals, Smart Fit size recommendations and delivery across Cameroon.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Only the first name reaches the browser; tokens stay in HttpOnly cookies.
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="en"
@@ -29,7 +33,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <StoreProvider>
-          <Header />
+          <Header
+            account={user ? { firstName: user.profile.first_name } : null}
+          />
           <main className="flex-1">{children}</main>
           <Footer />
         </StoreProvider>

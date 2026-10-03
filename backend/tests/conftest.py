@@ -10,6 +10,9 @@ If PostgreSQL is not reachable, these tests are skipped with a clear message.
 import os
 from collections.abc import Iterator
 
+# A throwaway signing key for tests, set before the app reads its settings.
+os.environ["JWT_SECRET_KEY"] = "test-only-jwt-secret-" + "x" * 32
+
 import pytest
 from alembic import command
 from alembic.config import Config
@@ -19,6 +22,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from app.core import rate_limit
 from app.core.config import BACKEND_DIR, settings
 from app.db.seed import seed_catalog
 from app.db.session import get_db
@@ -85,3 +89,10 @@ def client(db_session: Session) -> Iterator[TestClient]:
             yield test_client
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits() -> Iterator[None]:
+    rate_limit.reset_all()
+    yield
+    rate_limit.reset_all()

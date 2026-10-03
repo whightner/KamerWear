@@ -93,6 +93,87 @@ Demo "Find Similar", rule-based (no image AI): products of the same type first,
 then closely related types (hoodies, sweatshirts, jackets), and only if none
 match, the same category. Excludes the product itself. `limit` 1–12 (default 4).
 
+## Errors
+
+Errors use one shape: `{"detail": {"code": "...", "message": "..."}}`. The
+`code` is stable and meant for clients; the `message` is for people.
+
+Invalid input returns `422` with field messages:
+
+```json
+{ "detail": { "code": "validation_error", "message": "Some fields are invalid.",
+              "fields": { "password": "Password must be at least 10 characters." } } }
+```
+
+| Status | Code | When |
+| --- | --- | --- |
+| 400 | `invalid_current_password` | password change with a wrong current password |
+| 401 | `authentication_required` | no `Authorization: Bearer` header |
+| 401 | `invalid_token` | access token expired, malformed, forged, or its session was revoked |
+| 401 | `invalid_credentials` | wrong email or password (same answer for both) |
+| 401 | `invalid_refresh_token` | refresh token expired, revoked, reused or malformed |
+| 403 | `inactive_account` | the account is deactivated |
+| 404 | `product_not_found` | unknown product slug |
+| 409 | `email_already_registered` | registration with an existing email (case-insensitive) |
+| 422 | `validation_error` | invalid input (see above) |
+| 429 | `too_many_attempts` | rate limit hit; see the `Retry-After` header |
+
+## Authentication
+
+Design, cookies, CSRF and rate limits: [../architecture/auth.md](../architecture/auth.md).
+
+Clients send the access token as `Authorization: Bearer <token>`. The API never
+reads or sets cookies (the web app keeps tokens in its own HttpOnly cookies).
+
+### `POST /api/v1/auth/register` → `201`
+
+```json
+{ "email": "alex@example.com", "password": "at least ten chars",
+  "first_name": "Alex", "last_name": "Mbarga", "phone": "+237 699 12 34 56" }
+```
+
+`phone` is optional (spaces, dots, dashes and parentheses are removed; 6–15
+digits with an optional `+`). Unknown fields such as `role` are rejected, so
+registration always creates a customer. The email is stored trimmed and
+lower-cased. The response is the same as login: the account is signed in.
+
+### `POST /api/v1/auth/login`
+
+`{ "email": "...", "password": "..." }` →
+
+```json
+{ "user": { "id": 1, "email": "alex@example.com", "role": "customer",
+            "is_active": true, "is_verified": false, "created_at": "...",
+            "profile": { "first_name": "Alex", "last_name": "Mbarga",
+                         "phone": "+237699123456", "avatar_path": null } },
+  "access_token": "...", "refresh_token": "...", "token_type": "bearer",
+  "access_token_expires_in": 900, "refresh_token_expires_in": 604800 }
+```
+
+### `POST /api/v1/auth/refresh`
+
+`{ "refresh_token": "..." }` → same shape as login, with a **new** refresh
+token. Each refresh token works once; reusing an old one signs that session out.
+
+### `POST /api/v1/auth/logout` → `204`
+
+`{ "refresh_token": "..." }`. Revokes the session; its access token stops
+working immediately. Always succeeds, even for an unknown token.
+
+### `GET /api/v1/users/me` (auth)
+
+The signed-in user (the `user` object above).
+
+### `PATCH /api/v1/users/me` (auth)
+
+Any of `first_name`, `last_name`, `phone` (`null` or `""` removes the phone).
+Email, role and status are read-only; sending them returns `422`.
+
+### `POST /api/v1/users/me/change-password` (auth) → `204`
+
+`{ "current_password": "...", "new_password": "..." }`. Signs out every other
+session of the user; the current one stays valid.
+
 ## CORS
 
 Browsers may call the API only from origins listed in the backend

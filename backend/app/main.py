@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.errors import register_error_handlers
 from app.api.v1.router import api_router
 from app.core.config import API_V1_PREFIX, API_VERSION, PROJECT_NAME, SERVICE_NAME, settings
 
@@ -14,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+register_error_handlers(app)
 app.include_router(api_router, prefix=API_V1_PREFIX)
 
 

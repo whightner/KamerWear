@@ -15,7 +15,7 @@ export default function FavoritesPage() {
         Favorites
       </h1>
       <p className="mb-6 mt-1 text-sm text-muted">
-        Saved for this browsing session only. Accounts come later.
+        Saved for this browsing session only. Saving favorites to your account comes later.
       </p>
       <FavoritesView />
     </Container>

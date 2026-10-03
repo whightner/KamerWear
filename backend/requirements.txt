@@ -6,6 +6,11 @@ uvicorn[standard]>=0.30
 pydantic>=2.7,<3
 pydantic-settings>=2.7,<3
 
+# Authentication: Argon2id password hashing, JWT signing, email validation
+argon2-cffi>=25.1
+PyJWT>=2.10
+email-validator>=2.2
+
 # Database
 sqlalchemy>=2.0,<3
 psycopg[binary]>=3.2,<4

@@ -19,45 +19,59 @@ import { useStore } from "@/components/store/StoreProvider";
 import { mainNavigation } from "@/data/navigation";
 import { Container } from "./Container";
 import { DeliveryCityButton } from "./DeliveryCityButton";
+import { AccountMenu } from "./AccountMenu";
 import { Logo } from "./Logo";
 
-interface AccountLink {
+interface HeaderLinkProps {
   label: string;
   href: string;
   icon: LucideIcon;
   /** Pages that don't exist yet are not prefetched. */
   prefetch?: false;
   count?: number;
+  ariaLabel?: string;
 }
 
-export function Header() {
+function HeaderLink({ label, href, icon: Icon, prefetch, count, ariaLabel }: HeaderLinkProps) {
+  return (
+    <Link
+      href={href}
+      prefetch={prefetch}
+      aria-label={ariaLabel ?? (count ? `${label}, ${count} items` : label)}
+      className="relative flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-medium text-ink hover:bg-cream sm:px-3"
+    >
+      <Icon className="size-5" aria-hidden="true" />
+      <span aria-hidden="true" className="hidden lg:inline">
+        {label}
+      </span>
+      {count ? (
+        <span
+          aria-hidden="true"
+          className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-deal px-1 text-[10px] font-bold text-white sm:right-1.5"
+        >
+          {count}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
+/** The signed-in customer, as much as the header needs; null when signed out. */
+export interface HeaderAccount {
+  firstName: string;
+}
+
+export function Header({ account }: { account: HeaderAccount | null }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartCount, favorites } = useStore();
 
-  const accountLinks: AccountLink[] = [
-    // Future route: order tracking arrives in a later task.
-    {
-      label: "Track order",
-      href: "/orders/track",
-      icon: Package,
-      prefetch: false,
-    },
-    // Future route: accounts arrive in a later task.
-    { label: "Account", href: "/account", icon: User, prefetch: false },
-    {
-      label: "Favorites",
-      href: "/favorites",
-      icon: Heart,
-      count: favorites.size,
-    },
-    { label: "Cart", href: "/cart", icon: ShoppingBag, count: cartCount },
-  ];
-
   return (
     <>
-      <p className="bg-ink py-2 text-center text-[11px] font-semibold tracking-[0.2em] text-white">
-        CAMEROON-WIDE DELIVERY • EASY RETURNS • SECURE CHECKOUT
-      </p>
+      <aside aria-label="Store information">
+        <p className="bg-ink py-2 text-center text-[11px] font-semibold tracking-[0.2em] text-white">
+          CAMEROON-WIDE DELIVERY • EASY RETURNS • SECURE CHECKOUT
+        </p>
+      </aside>
 
       <header className="sticky top-0 z-40 border-b border-line bg-white">
         <Container className="flex h-[72px] items-center gap-3 md:gap-6">
@@ -112,30 +126,15 @@ export function Header() {
             aria-label="Account and cart"
             className="ml-auto flex items-center sm:gap-1"
           >
-            {accountLinks.map(
-              ({ label, href, icon: Icon, prefetch, count }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  prefetch={prefetch}
-                  aria-label={count ? `${label}, ${count} items` : label}
-                  className="relative flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-medium text-ink hover:bg-cream sm:px-3"
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                  <span aria-hidden="true" className="hidden lg:inline">
-                    {label}
-                  </span>
-                  {count ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-deal px-1 text-[10px] font-bold text-white sm:right-1.5"
-                    >
-                      {count}
-                    </span>
-                  ) : null}
-                </Link>
-              ),
+            {/* Future route: order tracking arrives in a later task. */}
+            <HeaderLink label="Track order" href="/orders/track" icon={Package} prefetch={false} />
+            {account ? (
+              <AccountMenu firstName={account.firstName} />
+            ) : (
+              <HeaderLink label="Account" href="/login" icon={User} ariaLabel="Account, log in" />
             )}
+            <HeaderLink label="Favorites" href="/favorites" icon={Heart} count={favorites.size} />
+            <HeaderLink label="Cart" href="/cart" icon={ShoppingBag} count={cartCount} />
           </nav>
         </Container>
 

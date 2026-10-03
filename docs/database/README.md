@@ -38,6 +38,25 @@ computed in code, not stored, so there is one source of truth.
 
 Not in the MVP: stock movement history, warehouses, reviews.
 
+## Accounts schema
+
+```
+users ──── user_profiles (one per user)
+  │
+  └──< auth_sessions (one per signed-in device)
+```
+
+| Table | Purpose | Notes |
+| --- | --- | --- |
+| `users` | Login identity | unique `email` (stored trimmed and lower-cased); `password_hash` is Argon2id, never plaintext; `role` is `customer` or `admin` (check constraint); `is_active`, `is_verified` (false until email verification exists); `created_at`, `updated_at`, `last_login_at` |
+| `user_profiles` | Personal details | `user_id` unique, cascades on delete; `first_name`, `last_name`, optional `phone` (normalised, e.g. `+237699123456`), `avatar_path` (unused for now) |
+| `auth_sessions` | Revocable login sessions | UUID `id` (the `sid` claim in tokens); `refresh_jti` is the only refresh token currently valid; `expires_at`, `last_used_at`, `revoked_at` (set on logout, password change or refresh-token reuse) |
+
+Expired and revoked sessions are kept; a cleanup job can come later.
+
+Favorites and cart are still kept in the browser only; they are not stored
+per account yet.
+
 ## Seed data
 
 ```bash
@@ -50,6 +69,9 @@ catalog data (the storefront has no product data of its own). It is idempotent: 
 by slug or SKU and updated, so running it again never duplicates data.
 Inventory is reset to the demo stock levels (low stock, sold-out sizes and one
 out-of-stock product, as in the storefront).
+
+The seed never creates users. Create an admin with
+`python -m app.db.create_admin` (see [../architecture/auth.md](../architecture/auth.md)).
 
 ## Migrations
 

@@ -12,12 +12,17 @@ from app.models.catalog import (
     ProductImage,
     ProductVariant,
 )
+from app.models.user import AuthSession, Role, User, UserProfile
 
 __all__ = [
+    "AuthSession",
     "Category",
     "Gender",
     "Inventory",
     "Product",
     "ProductImage",
     "ProductVariant",
+    "Role",
+    "User",
+    "UserProfile",
 ]

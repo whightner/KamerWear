@@ -12,7 +12,7 @@ export const mainNavigation: (NavLink & { highlight?: boolean })[] = [
   { label: "Deals", href: "/shop?deals=true", highlight: true },
 ];
 
-// Help pages and accounts arrive in later tasks; until then these links point
+// Help pages and orders arrive in later tasks; until then these links point
 // to the homepage sections that describe them, or to future routes.
 export const footerNavigation: { title: string; links: NavLink[] }[] = [
   {
@@ -37,7 +37,8 @@ export const footerNavigation: { title: string; links: NavLink[] }[] = [
   {
     title: "Account",
     links: [
-      { label: "Profile", href: "/account" },
+      { label: "My account", href: "/account" },
+      { label: "Profile", href: "/account/profile" },
       { label: "Orders", href: "/orders" },
       { label: "Track order", href: "/orders/track" },
       { label: "Favorites", href: "/favorites" },

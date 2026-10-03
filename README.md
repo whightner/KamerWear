@@ -26,9 +26,10 @@ https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8
 
 ### Current scope
 
-**Task 001: project foundation.** It covers the repository layout, documentation, the FastAPI
-backend skeleton with a health endpoint, PostgreSQL/SQLAlchemy/Alembic wiring
-and CORS for the local frontend. No business features exist yet.
+The storefront reads a real catalog from the API, keeps the cart and favorites
+in the browser, and customers can create an account, log in and manage their
+profile. Checkout, orders and the AI features are not built yet; see
+[Project status](#project-status).
 
 ## Architecture
 
@@ -74,11 +75,11 @@ KamerWear/
 ├── backend/
 │   ├── app/
 │   │   ├── api/v1/           REST endpoints, mounted under /api/v1
-│   │   ├── core/config.py    settings loaded from the environment
 │   │   ├── db/               SQLAlchemy base and session
-│   │   ├── models/           database models (none yet)
+│   │   ├── core/             settings, password hashing/JWT, rate limiting
+│   │   ├── models/           database models (catalog, users)
 │   │   ├── schemas/          request/response models
-│   │   ├── services/         business logic (none yet)
+│   │   ├── services/         business logic (catalog, auth)
 │   │   └── main.py           FastAPI application
 │   ├── alembic/              migrations
 │   ├── tests/
@@ -123,11 +124,19 @@ source .venv/bin/activate          # macOS / Linux
 pip install -r requirements.txt
 
 # Configure: copy the example, then put your PostgreSQL password in DATABASE_URL
+# and a random JWT_SECRET_KEY (see the comment in the file for a command).
 cp .env.example .env               # Windows: copy .env.example .env
 
-alembic upgrade head               # create the catalog tables
+alembic upgrade head               # create the catalog and account tables
 python -m app.db.seed              # load the demo catalog (safe to run again)
 uvicorn app.main:app --reload      # http://localhost:8000
+```
+
+Optional: create an admin account (prompts for the details; nothing is
+hard-coded, and the seed never creates users):
+
+```bash
+python -m app.db.create_admin
 ```
 
 Useful URLs:
@@ -191,6 +200,12 @@ storefront always fetches fresh data.
 - The backend allows browser requests only from the origins listed in
   `CORS_ORIGINS` (default `http://localhost:3000`). Wildcard `*` is rejected.
 - Money is exchanged as integers in XAF (e.g. `15000` means 15 000 FCFA).
+- Accounts: login, registration and the account pages use Next.js Server
+  Actions that call `/api/v1/auth/*` and `/api/v1/users/me`. Tokens are kept
+  in HttpOnly cookies on the Next.js site and sent to FastAPI as a Bearer
+  header; browser JavaScript never sees them. `/account` and
+  `/account/profile` require a session. Details, including CSRF and token
+  refresh: [docs/architecture/auth.md](docs/architecture/auth.md).
 
 ## Project status
 
@@ -203,4 +218,5 @@ storefront always fetches fresh data.
 | Catalog, product pages, frontend cart and favorites (mock data) | Done (Task 003) |
 | Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004) |
 | Storefront reads the catalog API (no frontend mock catalog) | Done (Task 005) |
-| Checkout, payments, accounts, order tracking, etc. | Not started (future tasks) |
+| Customer accounts: register, login, logout, profile, password change | Done (Task 006) |
+| Checkout, payments, addresses, order tracking, saved favorites/cart, etc. | Not started (future tasks) |

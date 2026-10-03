@@ -29,6 +29,8 @@ Figma product board.
 - Calls the backend REST API. It holds no business rules and never accesses the
   database directly.
 - Reads the API base URL from `NEXT_PUBLIC_API_URL`.
+- Holds the customer's auth tokens in HttpOnly cookies and forwards them to the
+  API from the server; see [auth.md](auth.md).
 
 ### REST API
 
@@ -49,7 +51,7 @@ The backend is one Python application, split into modules by responsibility:
 | `app/services/` | Business logic, testable without HTTP |
 | `app/models/` | SQLAlchemy models (database tables) |
 | `app/db/` | Declarative base and database sessions |
-| `app/core/` | Configuration from environment variables |
+| `app/core/` | Configuration, password hashing and JWTs, rate limiting |
 
 As features arrive (catalog, cart, orders, …), each one adds its own endpoint,
 schema, service and model files. They stay inside this same application.
