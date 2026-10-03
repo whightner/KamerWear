@@ -175,4 +175,5 @@ npm run build
 | Backend skeleton, health endpoint, CORS | Done (Task 001) |
 | Database connection and Alembic setup | Done (Task 001), no tables yet |
 | Desktop storefront homepage (mock data) | Done (Task 002) |
-| Catalog API, cart, checkout, accounts, etc. | Not started (future tasks) |
+| Catalog, product pages, frontend cart and favorites (mock data) | Done (Task 003) |
+| Catalog API, checkout, payments, accounts, etc. | Not started (future tasks) |

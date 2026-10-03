@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { categories } from "@/data/categories";
 import { Container } from "./Container";
 import { SectionHeading } from "./SectionHeading";
@@ -15,7 +16,7 @@ export function CategoryGrid() {
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {categories.map((category) => (
             <li key={category.slug}>
-              <a
+              <Link
                 href={category.href}
                 className="group relative block aspect-[4/5] overflow-hidden rounded-xl bg-white"
               >
@@ -35,7 +36,7 @@ export function CategoryGrid() {
                 <span className="absolute bottom-3 left-3 text-base font-bold text-white">
                   {category.name}
                 </span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

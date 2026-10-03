@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Ruler } from "lucide-react";
 import { Container } from "./Container";
 
@@ -23,20 +24,20 @@ export function Hero() {
               Discover fashion, smarter sizing and fast local delivery.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#recommended"
+              <Link
+                href="/shop?new=true"
                 className="inline-flex h-12 items-center gap-2 rounded-lg bg-ink px-6 text-sm font-semibold text-white hover:bg-black"
               >
                 Shop New Arrivals
                 <ArrowRight className="size-4" aria-hidden="true" />
-              </a>
-              <a
-                href="#smart-fit"
+              </Link>
+              <Link
+                href="/#smart-fit"
                 className="inline-flex h-12 items-center gap-2 rounded-lg border border-ink/80 bg-white/40 px-6 text-sm font-semibold text-ink hover:bg-white"
               >
                 <Ruler className="size-4" aria-hidden="true" />
                 Find My Size
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -1,7 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Ruler, Star } from "lucide-react";
 import type { Product } from "@/types/catalog";
 import { discountPercent, formatXaf, sizeHint } from "@/lib/format";
+import {
+  primaryImage,
+  productHref,
+  productLabel,
+  stockStatus,
+} from "@/lib/products";
 import { FavoriteButton } from "./FavoriteButton";
 
 interface ProductCardProps {
@@ -13,38 +20,39 @@ interface ProductCardProps {
 // Visual priority: image → name → price → discount → rating / Smart Fit / stock.
 export function ProductCard({ product, imageSizes }: ProductCardProps) {
   const discount = discountPercent(product.price, product.oldPrice);
+  const image = primaryImage(product);
+  const stock = stockStatus(product);
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-line bg-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(27,26,25,0.08)]">
       {/* All product photos share the same 4:5 frame and #f2f2f2 background. */}
       <div className="relative aspect-[4/5] overflow-hidden bg-[#f2f2f2]">
         <Image
-          src={product.image}
-          alt={product.imageAlt}
+          src={image.src}
+          alt={image.alt}
           fill
           sizes={imageSizes}
           className="object-cover transition duration-300 group-hover:scale-[1.03]"
         />
         <div className="absolute right-2 top-2 z-10">
-          <FavoriteButton productName={product.name} />
+          <FavoriteButton slug={product.slug} productName={product.name} />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col p-3">
         <p className="truncate text-[11px] font-medium uppercase tracking-wider text-muted">
-          {product.department} · {product.category}
+          {productLabel(product)}
         </p>
         <h3
           className="mt-1 line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-ink"
           title={product.name}
         >
-          {/* Product pages come later; the link keeps the card keyboard-reachable. */}
-          <a
-            href="#"
+          <Link
+            href={productHref(product)}
             className="after:absolute after:inset-0 after:content-['']"
           >
             {product.name}
-          </a>
+          </Link>
         </h3>
 
         <div className="mt-2">
@@ -88,11 +96,13 @@ export function ProductCard({ product, imageSizes }: ProductCardProps) {
           </p>
           <p className="flex items-center justify-between gap-2">
             <span className="min-w-0 truncate text-muted">
-              {sizeHint(product.sizes)}
+              {product.sizes.length ? sizeHint(product.sizes) : "One size"}
             </span>
-            {product.stockHint && (
-              <span className="shrink-0 font-semibold text-deal">
-                {product.stockHint}
+            {stock.kind !== "in" && (
+              <span
+                className={`shrink-0 font-semibold ${stock.kind === "out" ? "text-muted" : "text-deal"}`}
+              >
+                {stock.label}
               </span>
             )}
           </p>

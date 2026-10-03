@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { footerNavigation } from "@/data/navigation";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
@@ -20,12 +21,13 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5">
               {group.links.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
+                    prefetch={false}
                     className="text-sm text-white/65 hover:text-white"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

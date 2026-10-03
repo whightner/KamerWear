@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 interface SectionHeadingProps {
@@ -31,13 +32,13 @@ export function SectionHeading({
         {children}
       </div>
       {action && (
-        <a
+        <Link
           href={action.href}
           className="flex items-center gap-0.5 text-sm font-semibold text-ink hover:text-deal"
         >
           {action.label}
           <ChevronRight className="size-4" aria-hidden="true" />
-        </a>
+        </Link>
       )}
     </div>
   );

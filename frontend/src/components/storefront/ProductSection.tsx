@@ -8,6 +8,7 @@ interface ProductSectionProps {
   title: string;
   subtitle?: string;
   products: Product[];
+  viewAllHref: string;
 }
 
 export function ProductSection({
@@ -15,6 +16,7 @@ export function ProductSection({
   title,
   subtitle,
   products,
+  viewAllHref,
 }: ProductSectionProps) {
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="pt-14">
@@ -23,11 +25,11 @@ export function ProductSection({
           id={`${id}-title`}
           title={title}
           subtitle={subtitle}
-          action={{ label: "View all", href: "#recommended" }}
+          action={{ label: "View all", href: viewAllHref }}
         />
         <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
-            <li key={product.id}>
+            <li key={product.slug}>
               <ProductCard
                 product={product}
                 imageSizes="(min-width: 1024px) 300px, (min-width: 768px) 33vw, 50vw"

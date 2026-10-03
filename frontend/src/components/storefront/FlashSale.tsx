@@ -27,7 +27,7 @@ export function FlashSale() {
                 Flash Sale
               </span>
             }
-            action={{ label: "View all", href: "#flash-sale" }}
+            action={{ label: "View all", href: "/shop?deals=true" }}
           >
             <div className="flex items-center gap-2.5">
               <span className="text-sm font-medium text-muted">Ends in</span>
@@ -37,7 +37,7 @@ export function FlashSale() {
 
           <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             {flashSaleProducts.map((product) => (
-              <li key={product.id}>
+              <li key={product.slug}>
                 <ProductCard
                   product={product}
                   imageSizes="(min-width: 1280px) 210px, (min-width: 768px) 33vw, 50vw"

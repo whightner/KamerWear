@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { formatXaf } from "@/lib/format";
 import { products } from "@/data/products";
+import { primaryImage } from "@/lib/products";
 import { ComingSoonButton } from "./ComingSoonButton";
 import { Container } from "./Container";
 
@@ -23,9 +24,7 @@ const sources: { label: string; icon: LucideIcon }[] = [
 ];
 
 // The scanned object is a sneaker, so every match shown is footwear.
-const similarShoes = products
-  .filter((p) => p.department === "Shoes")
-  .slice(0, 2);
+const similarShoes = products.filter((p) => p.category === "shoes").slice(0, 2);
 
 function FlowStep({ number, label }: { number: number; label: string }) {
   return (
@@ -115,12 +114,12 @@ export function VisualSearchBanner() {
               <ul className="mt-2 grid grid-cols-3 gap-2">
                 {similarShoes.map((item) => (
                   <li
-                    key={item.id}
+                    key={item.slug}
                     className="overflow-hidden rounded-lg border border-line"
                   >
                     <div className="relative aspect-square bg-[#f2f2f2]">
                       <Image
-                        src={item.image}
+                        src={primaryImage(item).src}
                         alt=""
                         fill
                         sizes="130px"
