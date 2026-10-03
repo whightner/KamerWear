@@ -96,7 +96,11 @@ KamerWear/
 
 ## Development setup
 
-Prerequisites: Python 3.11+, PostgreSQL 16+, Node.js 20.9+ and npm, Git.
+Prerequisites: Python 3.11+, PostgreSQL 16+ (tested on 16 and 18), Node.js 20.9+ and npm, Git.
+
+The storefront needs **both services running**: product data comes from the
+FastAPI catalog API, which reads PostgreSQL. Without the API the storefront
+shows a "couldn't load the catalog" message (there is no offline product copy).
 
 ### 1. Database
 
@@ -142,6 +146,8 @@ pytest
 
 ### 3. Frontend
 
+In a second terminal (keep the backend running):
+
 ```bash
 cd frontend
 npm install
@@ -161,10 +167,26 @@ npm run lint
 npm run build
 ```
 
+### Day-to-day
+
+| Terminal | Command |
+| --- | --- |
+| A — API | `cd backend` → activate the virtualenv → `uvicorn app.main:app --reload` |
+| B — web | `cd frontend` → `npm run dev` |
+
+After changing the seed data, run `python -m app.db.seed` again; the
+storefront always fetches fresh data.
+
 ## How the frontend and backend communicate
 
 - The frontend calls the backend over HTTP using JSON, at the base URL in
   `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000/api/v1`).
+- Catalog requests are made by the Next.js server while rendering pages
+  (`frontend/src/lib/api/catalog.ts`, always fresh: `cache: "no-store"`), so the
+  browser only talks to the Next.js app. Product images are static files served
+  by Next.js from `frontend/public/images`; the API stores only their paths.
+- `/shop` keeps filters, search, sorting and page in the URL and passes them to
+  `GET /api/v1/products`; the API does all filtering.
 - Every backend endpoint is versioned under `/api/v1`.
 - The backend allows browser requests only from the origins listed in
   `CORS_ORIGINS` (default `http://localhost:3000`). Wildcard `*` is rejected.
@@ -179,5 +201,6 @@ npm run build
 | Database connection and Alembic setup | Done (Task 001), no tables yet |
 | Desktop storefront homepage (mock data) | Done (Task 002) |
 | Catalog, product pages, frontend cart and favorites (mock data) | Done (Task 003) |
-| Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004); frontend still uses mock data |
-| Frontend on the catalog API, checkout, payments, accounts, etc. | Not started (future tasks) |
+| Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004) |
+| Storefront reads the catalog API (no frontend mock catalog) | Done (Task 005) |
+| Checkout, payments, accounts, order tracking, etc. | Not started (future tasks) |

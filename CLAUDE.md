@@ -53,6 +53,8 @@ docs/                    architecture, API and database notes
 - New settings go in `backend/app/core/config.py` and are documented in
   `backend/.env.example` with a placeholder value.
 - Frontend reads the API base URL from `NEXT_PUBLIC_API_URL`.
+- Catalog data comes only from the API through `frontend/src/lib/api/`. Never add
+  a local product dataset or a mock fallback; show an error state instead.
 - Keep files small and focused; split by feature when a file grows.
 
 ## Checks before finishing a task

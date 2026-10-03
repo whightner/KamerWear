@@ -6,8 +6,9 @@ Idempotent: categories, products and variants are matched by slug or SKU and
 updated in place, images are replaced, so running it twice never duplicates
 data. Inventory is reset to the demo stock levels on every run.
 
-The data comes from seed_data/catalog.json, an export of the frontend mock
-catalog (frontend/src/data/products.ts) so the API serves the same products.
+The data comes from seed_data/catalog.json, the single source of the demo
+catalog. (It was first exported from the Task 003 frontend mock data, which has
+since been removed; the storefront now reads everything from the API.)
 """
 
 import json

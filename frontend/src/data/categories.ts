@@ -1,7 +1,7 @@
-import type { Category } from "@/types/catalog";
+import type { CategoryTile } from "@/types/catalog";
 
-// Homepage category tiles; each opens a filtered /shop view.
-export const categories: Category[] = [
+// Homepage category tiles (presentation config). Links use backend category slugs.
+export const categories: CategoryTile[] = [
   {
     slug: "sneakers",
     name: "Sneakers",

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { ProductCard } from "@/components/storefront/ProductCard";
-import { products } from "@/data/products";
 import { useStore } from "./StoreProvider";
 
 export function FavoritesView() {
   const { favorites } = useStore();
-  const saved = products.filter((product) => favorites.has(product.slug));
+  // Favorites keep the API product they were saved with; no local catalog lookup.
+  const saved = [...favorites.values()];
 
   if (saved.length === 0) {
     return (

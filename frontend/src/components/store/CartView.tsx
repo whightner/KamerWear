@@ -4,27 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { ComingSoonButton } from "@/components/storefront/ComingSoonButton";
-import { getProduct } from "@/data/products";
 import { formatXaf } from "@/lib/format";
 import { productHref } from "@/lib/products";
-import { cartItemKey, useStore } from "./StoreProvider";
+import { maxQuantity, useStore } from "./StoreProvider";
 
 export function CartView() {
   const { cart, setQuantity, removeFromCart } = useStore();
-
-  const lines = cart.flatMap((item) => {
-    const product = getProduct(item.slug);
-    const color = product?.colors.find((c) => c.slug === item.colorSlug);
-    return product && color
-      ? [{ item, product, color, key: cartItemKey(item) }]
-      : [];
-  });
-  const subtotal = lines.reduce(
-    (sum, line) => sum + line.product.price * line.item.quantity,
+  const subtotal = cart.reduce(
+    (sum, line) => sum + line.unitPrice * line.quantity,
     0,
   );
 
-  if (lines.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-line bg-white px-6 py-16 text-center">
         <p className="text-lg font-bold text-ink">Your cart is empty</p>
@@ -45,75 +36,91 @@ export function CartView() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
       <ul className="divide-y divide-line rounded-xl border border-line bg-white">
-        {lines.map(({ item, product, color, key }) => (
-          <li key={key} className="flex gap-4 p-4">
-            <Link
-              href={productHref(product)}
-              className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-lg bg-[#f2f2f2]"
-            >
-              <Image
-                src={color.images[0].src}
-                alt={color.images[0].alt}
-                fill
-                sizes="80px"
-                className="object-cover"
-              />
-            </Link>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
+        {cart.map((line) => {
+          const href = productHref({ slug: line.productSlug });
+          const limit = maxQuantity(line.availableQuantity);
+          return (
+            <li key={line.variantId} className="flex gap-4 p-4">
               <Link
-                href={productHref(product)}
-                className="truncate font-semibold text-ink hover:underline"
+                href={href}
+                className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-lg bg-[#f2f2f2]"
               >
-                {product.name}
+                {line.image && (
+                  <Image
+                    src={line.image.src}
+                    alt={line.image.alt}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                )}
               </Link>
-              <p className="text-sm text-muted">
-                {color.name}
-                {item.size &&
-                  ` · ${product.category === "shoes" ? "EU " : ""}${item.size}`}
-              </p>
-              <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
-                <div
-                  role="group"
-                  aria-label={`Quantity for ${product.name}`}
-                  className="flex h-9 items-center rounded-lg border border-line"
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <Link
+                  href={href}
+                  className="truncate font-semibold text-ink hover:underline"
                 >
-                  <button
-                    type="button"
-                    aria-label="Decrease quantity"
-                    disabled={item.quantity <= 1}
-                    onClick={() => setQuantity(key, item.quantity - 1)}
-                    className="flex h-full w-9 items-center justify-center disabled:text-line"
-                  >
-                    <Minus className="size-4" aria-hidden="true" />
-                  </button>
-                  <span className="w-7 text-center text-sm font-semibold">
-                    {item.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Increase quantity"
-                    disabled={item.quantity >= 10}
-                    onClick={() => setQuantity(key, item.quantity + 1)}
-                    className="flex h-full w-9 items-center justify-center disabled:text-line"
-                  >
-                    <Plus className="size-4" aria-hidden="true" />
-                  </button>
-                </div>
-                <p className="font-bold text-ink">
-                  {formatXaf(product.price * item.quantity)}
+                  {line.productName}
+                </Link>
+                <p className="text-sm text-muted">
+                  {line.colorName}
+                  {line.size &&
+                    ` · ${line.categorySlug === "shoes" ? "EU " : ""}${line.size}`}
+                  <span className="ml-2 text-xs">SKU {line.sku}</span>
                 </p>
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+                  <div
+                    role="group"
+                    aria-label={`Quantity for ${line.productName}`}
+                    className="flex h-9 items-center rounded-lg border border-line"
+                  >
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      disabled={line.quantity <= 1}
+                      onClick={() =>
+                        setQuantity(line.variantId, line.quantity - 1)
+                      }
+                      className="flex h-full w-9 items-center justify-center disabled:text-line"
+                    >
+                      <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <span className="w-7 text-center text-sm font-semibold">
+                      {line.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      disabled={line.quantity >= limit}
+                      onClick={() =>
+                        setQuantity(line.variantId, line.quantity + 1)
+                      }
+                      className="flex h-full w-9 items-center justify-center disabled:text-line"
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <p className="font-bold text-ink">
+                    {formatXaf(line.unitPrice * line.quantity)}
+                  </p>
+                </div>
+                {line.quantity >= limit && line.availableQuantity <= 10 && (
+                  <p className="text-xs text-deal">
+                    Only {line.availableQuantity} available
+                  </p>
+                )}
               </div>
-            </div>
-            <button
-              type="button"
-              aria-label={`Remove ${product.name} from cart`}
-              onClick={() => removeFromCart(key)}
-              className="self-start rounded-md p-1.5 text-muted hover:bg-cream hover:text-ink"
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-            </button>
-          </li>
-        ))}
+              <button
+                type="button"
+                aria-label={`Remove ${line.productName} from cart`}
+                onClick={() => removeFromCart(line.variantId)}
+                className="self-start rounded-md p-1.5 text-muted hover:bg-cream hover:text-ink"
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       <aside
@@ -126,7 +133,8 @@ export function CartView() {
           <span className="font-bold text-ink">{formatXaf(subtotal)}</span>
         </div>
         <p className="mt-1 text-xs text-muted">
-          Delivery fees are calculated at checkout.
+          Delivery fees are calculated at checkout. Stock is checked again at
+          checkout.
         </p>
         <div className="mt-5">
           <ComingSoonButton

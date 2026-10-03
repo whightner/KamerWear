@@ -1,15 +1,8 @@
-import type {
-  Gender,
-  Product,
-  ProductImage,
-  SimilarGroup,
-} from "@/types/catalog";
+import type { Gender, ProductListItem } from "@/lib/api/types";
 
-export function primaryImage(product: Product): ProductImage {
-  return product.colors[0].images[0];
-}
+// Presentation helpers for API products. No catalog data lives here.
 
-export function productHref(product: Product): string {
+export function productHref(product: Pick<ProductListItem, "slug">): string {
   return `/product/${product.slug}`;
 }
 
@@ -20,8 +13,8 @@ const GENDER_LABELS: Record<Gender, string> = {
 };
 
 /** Short label for cards, e.g. "Men · Hoodie". */
-export function productLabel(product: Product): string {
-  return `${GENDER_LABELS[product.gender]} · ${product.type}`;
+export function productLabel(product: ProductListItem): string {
+  return `${GENDER_LABELS[product.gender]} · ${product.product_type}`;
 }
 
 export type StockStatus =
@@ -29,33 +22,14 @@ export type StockStatus =
   | { kind: "low"; label: string }
   | { kind: "in"; label: "In stock" };
 
-export function stockStatus(product: Product): StockStatus {
-  if (product.stock <= 0) return { kind: "out", label: "Out of stock" };
-  if (product.stock <= 5)
-    return { kind: "low", label: `Only ${product.stock} left` };
+/** Turns an API availability number into a label (the API computes the number). */
+export function stockStatus(availableQuantity: number): StockStatus {
+  if (availableQuantity <= 0) return { kind: "out", label: "Out of stock" };
+  if (availableQuantity <= 5)
+    return { kind: "low", label: `Only ${availableQuantity} left` };
   return { kind: "in", label: "In stock" };
 }
 
-// Demo "Find Similar": same product group first, then closely related groups.
-// No image AI is involved yet.
-const RELATED_GROUPS: Record<SimilarGroup, SimilarGroup[]> = {
-  sneakers: [],
-  tees: [],
-  hoodies: ["outerwear"],
-  outerwear: ["hoodies"],
-  bottoms: [],
-  bags: [],
-};
-
-export function similarProducts(
-  product: Product,
-  all: Product[],
-  limit = 4,
-): Product[] {
-  const others = all.filter((p) => p.slug !== product.slug);
-  const sameGroup = others.filter((p) => p.group === product.group);
-  const related = others.filter((p) =>
-    RELATED_GROUPS[product.group].includes(p.group),
-  );
-  return [...sameGroup, ...related].slice(0, limit);
+export function isShoe(product: Pick<ProductListItem, "category">): boolean {
+  return product.category.slug === "shoes";
 }

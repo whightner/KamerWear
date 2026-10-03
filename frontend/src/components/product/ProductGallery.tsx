@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { ProductImage } from "@/types/catalog";
+import type { ProductImage } from "@/lib/api/types";
 
 interface ProductGalleryProps {
   images: ProductImage[];
@@ -17,17 +17,20 @@ export function ProductGallery({
   onSelect,
 }: ProductGalleryProps) {
   const current = images[selected] ?? images[0];
+  if (!current) {
+    return <div className="aspect-[4/5] w-full rounded-xl bg-[#f2f2f2]" />;
+  }
 
   return (
     <div className="flex flex-col-reverse gap-3 sm:flex-row">
       {images.length > 1 && (
         <ul className="flex gap-2 sm:flex-col" aria-label="Product photos">
           {images.map((image, index) => (
-            <li key={image.src}>
+            <li key={image.image_path}>
               <button
                 type="button"
                 onClick={() => onSelect(index)}
-                aria-label={`Show ${image.alt}`}
+                aria-label={`Show ${image.alt_text}`}
                 aria-pressed={index === selected}
                 className={`relative block aspect-[4/5] w-16 overflow-hidden rounded-lg border-2 bg-[#f2f2f2] lg:w-20 ${
                   index === selected
@@ -36,7 +39,7 @@ export function ProductGallery({
                 }`}
               >
                 <Image
-                  src={image.src}
+                  src={image.image_path}
                   alt=""
                   fill
                   sizes="80px"
@@ -50,9 +53,9 @@ export function ProductGallery({
 
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-[#f2f2f2]">
         <Image
-          key={current.src}
-          src={current.src}
-          alt={current.alt}
+          key={current.image_path}
+          src={current.image_path}
+          alt={current.alt_text}
           fill
           loading="eager"
           fetchPriority="high"

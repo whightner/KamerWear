@@ -4,25 +4,47 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ScanSearch, ShoppingBag, Star, Zap } from "lucide-react";
-import type { Product } from "@/types/catalog";
-import { useStore } from "@/components/store/StoreProvider";
+import type {
+  ProductDetail as ApiProduct,
+  ProductImage,
+  ProductListItem,
+  ProductVariant,
+} from "@/lib/api/types";
+import {
+  maxQuantity,
+  useCartQuantity,
+  useStore,
+} from "@/components/store/StoreProvider";
 import { DeliveryCityButton } from "@/components/storefront/DeliveryCityButton";
 import { FavoriteButton } from "@/components/storefront/FavoriteButton";
 import { ProductCard } from "@/components/storefront/ProductCard";
-import { discountPercent, formatXaf } from "@/lib/format";
-import { productLabel, stockStatus } from "@/lib/products";
+import { formatXaf } from "@/lib/format";
+import {
+  isShoe as isShoeProduct,
+  productLabel,
+  stockStatus,
+} from "@/lib/products";
 import { ProductGallery } from "./ProductGallery";
 import { SmartFitBlock } from "./SmartFitBlock";
 
 interface ProductDetailProps {
-  product: Product;
-  similar: Product[];
+  product: ApiProduct;
+  /** From GET /products/{slug}/similar; null if that request failed. */
+  similar: ProductListItem[] | null;
+}
+
+/** Photos for a colour, falling back to colour-neutral photos, then all photos. */
+function galleryFor(images: ProductImage[], colorName: string): ProductImage[] {
+  const forColor = images.filter((image) => image.color_name === colorName);
+  if (forColor.length) return forColor;
+  const general = images.filter((image) => image.color_name === null);
+  return general.length ? general : images;
 }
 
 export function ProductDetail({ product, similar }: ProductDetailProps) {
   const router = useRouter();
   const { addToCart } = useStore();
-  const [colorIndex, setColorIndex] = useState(0);
+  const [colorName, setColorName] = useState(product.colors[0]?.name ?? "");
   const [imageIndex, setImageIndex] = useState(0);
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -32,13 +54,48 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
   const similarRef = useRef<HTMLElement>(null);
   const sizeGroupRef = useRef<HTMLFieldSetElement>(null);
 
-  const color = product.colors[colorIndex];
-  const discount = discountPercent(product.price, product.oldPrice);
-  const stock = stockStatus(product);
-  const isShoe = product.category === "shoes";
+  const isShoe = isShoeProduct(product);
   const needsSize = product.sizes.length > 0;
-  const soldOut = new Set(product.soldOutSizes ?? []);
-  const maxQuantity = Math.max(1, Math.min(10, product.stock));
+  const gallery = galleryFor(product.images, colorName);
+  const colorHex =
+    product.colors.find((c) => c.name === colorName)?.hex ?? "#cccccc";
+
+  // product + colour + size → the real backend variant.
+  const variantsForColor = product.variants.filter(
+    (v) => v.color_name === colorName,
+  );
+  const variantFor = (sizeValue: string | null): ProductVariant | undefined =>
+    variantsForColor.find((v) => v.size === sizeValue);
+  const selected = needsSize
+    ? size
+      ? variantFor(size)
+      : undefined
+    : variantFor(null);
+  const colorAvailable = variantsForColor.reduce(
+    (sum, v) => sum + v.available_quantity,
+    0,
+  );
+
+  // Stock comes from the API; the quantity can't exceed what is left after
+  // what's already in the cart.
+  const inCart = useCartQuantity(selected?.id);
+  const remaining = selected
+    ? Math.max(0, maxQuantity(selected.available_quantity) - inCart)
+    : 0;
+  const quantityLimit = Math.max(1, remaining);
+  const effectiveQuantity = Math.min(quantity, quantityLimit);
+  const stock = stockStatus(
+    selected ? selected.available_quantity : colorAvailable,
+  );
+  const canBuy = selected ? remaining > 0 : colorAvailable > 0;
+
+  // A variant price override replaces the product price (and its discount).
+  const hasOverride =
+    selected !== undefined && selected.price !== product.price;
+  const price = selected?.price ?? product.price;
+  const discount = hasOverride ? null : product.discount_percent;
+
+  const soldOutSizes = product.sizes.filter((s) => !variantFor(s)?.in_stock);
 
   useEffect(() => {
     if (showSimilar) {
@@ -49,12 +106,22 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
     }
   }, [showSimilar]);
 
+  function selectColor(name: string) {
+    setColorName(name);
+    setImageIndex(0);
+    // Keep the chosen size only if it is still available in the new colour.
+    const keep = size
+      ? product.variants.find((v) => v.color_name === name && v.size === size)
+      : undefined;
+    if (!keep?.in_stock) setSize(undefined);
+  }
+
   function selectSize(value: string) {
     setSize(value);
     setSizeError(false);
   }
 
-  /** Adds the current selection to the cart; returns false if a size is missing. */
+  /** Adds the selected variant to the cart; returns false if nothing was added. */
   function addSelection(): boolean {
     if (needsSize && !size) {
       setSizeError(true);
@@ -63,13 +130,30 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
         ?.focus();
       return false;
     }
-    addToCart({ slug: product.slug, colorSlug: color.slug, size, quantity });
-    const parts = [color.name, size && (isShoe ? `EU ${size}` : size)].filter(
-      Boolean,
-    );
+    if (!selected || remaining <= 0) return false;
+    const image = gallery[0];
+    addToCart({
+      variantId: selected.id,
+      sku: selected.sku,
+      productId: product.id,
+      productSlug: product.slug,
+      productName: product.name,
+      categorySlug: product.category.slug,
+      colorName: selected.color_name,
+      size: selected.size,
+      unitPrice: selected.price,
+      image: image ? { src: image.image_path, alt: image.alt_text } : null,
+      availableQuantity: selected.available_quantity,
+      quantity: effectiveQuantity,
+    });
+    const parts = [
+      selected.color_name,
+      selected.size && (isShoe ? `EU ${selected.size}` : selected.size),
+    ].filter(Boolean);
     setConfirmation(
-      `Added to cart: ${product.name} (${parts.join(", ")}) × ${quantity}.`,
+      `Added to cart: ${product.name} (${parts.join(", ")}) × ${effectiveQuantity}.`,
     );
+    setQuantity(1);
     return true;
   }
 
@@ -83,7 +167,7 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
           <ProductGallery
-            images={color.images}
+            images={gallery}
             selected={imageIndex}
             onSelect={setImageIndex}
           />
@@ -92,7 +176,7 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
         <div className="lg:col-span-5">
           <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted">
             {productLabel(product)}
-            {product.isNew && (
+            {product.is_new && (
               <span className="rounded bg-gold-soft px-1.5 py-0.5 text-[10px] font-bold text-ink">
                 NEW
               </span>
@@ -108,23 +192,23 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
           >
             <Star className="size-4 fill-gold text-gold" aria-hidden="true" />
             <span className="font-semibold text-ink">
-              {product.rating.toFixed(1)}
+              {product.rating_average.toFixed(1)}
             </span>
             <span className="sr-only">out of 5 stars,</span>
-            <span>· {product.reviewCount} reviews</span>
+            <span>· {product.review_count} reviews</span>
           </a>
 
           <div className="mt-4">
             <p
               className={`text-3xl font-extrabold ${discount ? "text-deal" : "text-ink"}`}
             >
-              {formatXaf(product.price)}
+              {formatXaf(price)}
             </p>
-            {discount && product.oldPrice && (
+            {discount && product.compare_at_price && (
               <p className="mt-1 flex items-center gap-2 text-sm">
                 <span className="text-muted line-through">
                   <span className="sr-only">Was </span>
-                  {formatXaf(product.oldPrice)}
+                  {formatXaf(product.compare_at_price)}
                 </span>
                 <span className="rounded bg-deal-soft px-1.5 py-0.5 text-xs font-bold text-deal">
                   -{discount}%
@@ -134,14 +218,13 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
           </div>
 
           <div className="mt-6 space-y-5">
-            {product.smartFit && (
+            {product.smart_fit && (
               <SmartFitBlock
                 isShoe={isShoe}
-                demoSize={product.smartFitDemoSize}
+                demoSize={product.smart_fit_demo_size ?? undefined}
                 canSelect={
-                  !!product.smartFitDemoSize &&
-                  !soldOut.has(product.smartFitDemoSize) &&
-                  stock.kind !== "out"
+                  !!product.smart_fit_demo_size &&
+                  !!variantFor(product.smart_fit_demo_size)?.in_stock
                 }
                 onSelectSize={selectSize}
               />
@@ -149,39 +232,45 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
 
             <fieldset>
               <legend className="text-sm font-semibold text-ink">
-                Color: <span className="font-normal">{color.name}</span>
+                Color: <span className="font-normal">{colorName}</span>
               </legend>
               {product.colors.length > 1 ? (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {product.colors.map((option, index) => (
-                    <button
-                      key={option.slug}
-                      type="button"
-                      aria-label={option.name}
-                      aria-pressed={index === colorIndex}
-                      title={option.name}
-                      onClick={() => {
-                        setColorIndex(index);
-                        setImageIndex(0);
-                      }}
-                      className={`flex size-10 items-center justify-center rounded-full border-2 ${
-                        index === colorIndex
-                          ? "border-ink"
-                          : "border-transparent hover:border-line"
-                      }`}
-                    >
-                      <span
-                        className="size-7 rounded-full ring-1 ring-black/10"
-                        style={{ backgroundColor: option.swatch }}
-                      />
-                    </button>
-                  ))}
+                  {product.colors.map((option) => {
+                    const colorSoldOut = !product.variants.some(
+                      (v) => v.color_name === option.name && v.in_stock,
+                    );
+                    return (
+                      <button
+                        key={option.name}
+                        type="button"
+                        aria-label={
+                          colorSoldOut
+                            ? `${option.name}, sold out`
+                            : option.name
+                        }
+                        aria-pressed={option.name === colorName}
+                        title={option.name}
+                        onClick={() => selectColor(option.name)}
+                        className={`flex size-10 items-center justify-center rounded-full border-2 ${
+                          option.name === colorName
+                            ? "border-ink"
+                            : "border-transparent hover:border-line"
+                        } ${colorSoldOut ? "opacity-40" : ""}`}
+                      >
+                        <span
+                          className="size-7 rounded-full ring-1 ring-black/10"
+                          style={{ backgroundColor: option.hex }}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="mt-2 flex items-center gap-2 text-sm text-muted">
                   <span
                     className="size-5 rounded-full ring-1 ring-black/10"
-                    style={{ backgroundColor: color.swatch }}
+                    style={{ backgroundColor: colorHex }}
                     aria-hidden="true"
                   />
                   Available in one colour
@@ -197,21 +286,20 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
               {needsSize && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {product.sizes.map((option) => {
-                    const unavailable =
-                      soldOut.has(option) || stock.kind === "out";
-                    const selected = option === size;
+                    const unavailable = !variantFor(option)?.in_stock;
+                    const isSelected = option === size;
                     return (
                       <button
                         key={option}
                         type="button"
                         disabled={unavailable}
-                        aria-pressed={selected}
+                        aria-pressed={isSelected}
                         aria-label={
                           unavailable ? `${option}, sold out` : option
                         }
                         onClick={() => selectSize(option)}
                         className={`h-11 min-w-12 rounded-lg border px-3 text-sm font-semibold transition ${
-                          selected
+                          isSelected
                             ? "border-ink bg-ink text-white"
                             : unavailable
                               ? "cursor-not-allowed border-line bg-cream/60 text-muted line-through"
@@ -235,7 +323,7 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
             </fieldset>
 
             <p
-              className={`flex items-center gap-2 text-sm font-semibold ${
+              className={`flex flex-wrap items-center gap-2 text-sm font-semibold ${
                 stock.kind === "in"
                   ? "text-fit"
                   : stock.kind === "low"
@@ -254,14 +342,27 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
                 aria-hidden="true"
               />
               {stock.label}
-              {soldOut.size > 0 && stock.kind !== "out" && (
+              {needsSize && !selected && colorAvailable > 0 && (
                 <span className="font-normal text-muted">
-                  · Size {[...soldOut].join(", ")} sold out
+                  · Choose a size to check its stock
+                </span>
+              )}
+              {!selected && soldOutSizes.length > 0 && colorAvailable > 0 && (
+                <span className="font-normal text-muted">
+                  · Size {soldOutSizes.join(", ")} sold out in {colorName}
                 </span>
               )}
             </p>
 
-            {stock.kind !== "out" && (
+            {selected && inCart > 0 && (
+              <p className="text-xs text-muted">
+                {remaining > 0
+                  ? `${inCart} already in your cart. You can add ${remaining} more.`
+                  : `All available stock of this item (${inCart}) is already in your cart.`}
+              </p>
+            )}
+
+            {canBuy && (
               <div className="flex items-center gap-3">
                 <span
                   id="quantity-label"
@@ -277,8 +378,10 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
                   <button
                     type="button"
                     aria-label="Decrease quantity"
-                    disabled={quantity <= 1}
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={effectiveQuantity <= 1}
+                    onClick={() =>
+                      setQuantity(Math.max(1, effectiveQuantity - 1))
+                    }
                     className="flex h-full w-10 items-center justify-center disabled:text-line"
                   >
                     <Minus className="size-4" aria-hidden="true" />
@@ -286,15 +389,18 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
                   <span
                     className="w-8 text-center text-sm font-semibold"
                     aria-live="polite"
+                    data-testid="quantity"
                   >
-                    {quantity}
+                    {effectiveQuantity}
                   </span>
                   <button
                     type="button"
                     aria-label="Increase quantity"
-                    disabled={quantity >= maxQuantity}
+                    disabled={!selected || effectiveQuantity >= quantityLimit}
                     onClick={() =>
-                      setQuantity((q) => Math.min(maxQuantity, q + 1))
+                      setQuantity(
+                        Math.min(quantityLimit, effectiveQuantity + 1),
+                      )
                     }
                     className="flex h-full w-10 items-center justify-center disabled:text-line"
                   >
@@ -308,27 +414,27 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
               <button
                 type="button"
                 onClick={addSelection}
-                disabled={stock.kind === "out"}
+                disabled={!canBuy}
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:bg-muted/50"
               >
                 <ShoppingBag className="size-4" aria-hidden="true" />
-                {stock.kind === "out" ? "Out of stock" : "Add to Cart"}
+                {canBuy
+                  ? "Add to Cart"
+                  : stock.kind === "out"
+                    ? "Out of stock"
+                    : "In your cart"}
               </button>
               <div className="grid grid-cols-[1fr_auto] gap-3">
                 <button
                   type="button"
                   onClick={buyNow}
-                  disabled={stock.kind === "out"}
+                  disabled={!canBuy}
                   className="flex h-12 items-center justify-center gap-2 rounded-lg bg-deal text-sm font-semibold text-white hover:bg-deal-dark disabled:cursor-not-allowed disabled:bg-muted/50"
                 >
                   <Zap className="size-4" aria-hidden="true" />
                   Buy Now
                 </button>
-                <FavoriteButton
-                  slug={product.slug}
-                  productName={product.name}
-                  variant="labelled"
-                />
+                <FavoriteButton product={product} variant="labelled" />
               </div>
               <p role="status" className="min-h-5 text-sm text-fit-dark">
                 {confirmation && (
@@ -385,12 +491,18 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
             Similar to {product.name}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Demo: matched by product type. Image-based matching comes later.
+            Demo: rule-based matching by product type. Image-based matching
+            comes later.
           </p>
-          {similar.length > 0 ? (
+          {similar === null ? (
+            <p className="mt-5 text-sm text-ink" role="alert">
+              We couldn&apos;t load similar items right now. Please try again
+              later.
+            </p>
+          ) : similar.length > 0 ? (
             <ul className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
               {similar.map((item) => (
-                <li key={item.slug}>
+                <li key={item.id}>
                   <ProductCard
                     product={item}
                     imageSizes="(min-width: 768px) 25vw, 50vw"

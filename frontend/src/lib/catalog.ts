@@ -1,14 +1,10 @@
-import type { Gender, Product, ProductCategory } from "@/types/catalog";
-import { discountPercent } from "./format";
+import type { ApiSort, Category, Gender, ProductQuery } from "@/lib/api/types";
 
-// Catalog filtering, search and sorting for /shop. Pure functions, so they
-// work on the server (page) and in client components (filter controls).
+// URL state for /shop. The URL is the source of truth for filters, search,
+// sorting and page; the catalog API does the actual filtering. These helpers
+// only parse the URL, build URLs, and translate them to API parameters.
 
-export const CATEGORY_OPTIONS: { value: ProductCategory; label: string }[] = [
-  { value: "shoes", label: "Shoes" },
-  { value: "clothing", label: "Clothing" },
-  { value: "accessories", label: "Accessories" },
-];
+export const PAGE_SIZE = 12;
 
 export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "men", label: "Men" },
@@ -24,24 +20,35 @@ export const PRICE_RANGES = [
     min: 10000,
     max: 20000,
   },
-  { value: "over-20000", label: "Over 20,000 FCFA", min: 20001, max: Infinity },
+  {
+    value: "over-20000",
+    label: "Over 20,000 FCFA",
+    min: 20001,
+    max: undefined,
+  },
 ] as const;
 
 export type PriceRange = (typeof PRICE_RANGES)[number]["value"];
 
-export const SORT_OPTIONS = [
+/** Size filter options (UI configuration). A size with no products simply returns no results. */
+export const SIZE_GROUPS = [
+  { label: "Clothing", sizes: ["XS", "S", "M", "L", "XL", "XXL"] },
+  { label: "Waist", sizes: ["30", "32", "34", "36"] },
+  { label: "Shoes (EU)", sizes: ["39", "40", "41", "42", "43", "44", "45"] },
+];
+
+export const SORT_OPTIONS: { value: ApiSort; label: string }[] = [
   { value: "recommended", label: "Recommended" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "rating", label: "Highest Rated" },
   { value: "discount", label: "Biggest Discount" },
-] as const;
-
-export type SortOption = (typeof SORT_OPTIONS)[number]["value"];
+];
 
 export interface CatalogFilters {
   q: string;
-  category?: ProductCategory;
+  /** Backend category slug, e.g. "shoes". */
+  category?: string;
   gender?: Gender;
   size?: string;
   price?: PriceRange;
@@ -49,17 +56,10 @@ export interface CatalogFilters {
   deals: boolean;
   inStock: boolean;
   isNew: boolean;
-  sort: SortOption;
+  sort: ApiSort;
+  /** 1-based page number. */
+  page: number;
 }
-
-export const EMPTY_FILTERS: CatalogFilters = {
-  q: "",
-  smartFit: false,
-  deals: false,
-  inStock: false,
-  isNew: false,
-  sort: "recommended",
-};
 
 type RawParams = Record<string, string | string[] | undefined>;
 
@@ -76,17 +76,21 @@ function oneOf<T extends string>(
 
 /** Reads URL search params; unknown values are ignored rather than erroring. */
 export function parseCatalogParams(params: RawParams): CatalogFilters {
+  const category = first(params.category);
+  const page = Number.parseInt(first(params.page) ?? "1", 10);
   return {
     q: (first(params.q) ?? "").trim().slice(0, 80),
-    category: oneOf(first(params.category), CATEGORY_OPTIONS),
+    category:
+      category && /^[a-z0-9-]{1,80}$/.test(category) ? category : undefined,
     gender: oneOf(first(params.gender), GENDER_OPTIONS),
-    size: first(params.size)?.slice(0, 5) || undefined,
+    size: first(params.size)?.slice(0, 10) || undefined,
     price: oneOf(first(params.price), PRICE_RANGES),
     smartFit: first(params.smartfit) === "true",
     deals: first(params.deals) === "true",
     inStock: first(params.instock) === "true",
     isNew: first(params.new) === "true",
     sort: oneOf(first(params.sort), SORT_OPTIONS) ?? "recommended",
+    page: Number.isFinite(page) && page > 1 ? Math.min(page, 1000) : 1,
   };
 }
 
@@ -103,6 +107,7 @@ export function catalogParams(filters: CatalogFilters): URLSearchParams {
   if (filters.inStock) params.set("instock", "true");
   if (filters.isNew) params.set("new", "true");
   if (filters.sort !== "recommended") params.set("sort", filters.sort);
+  if (filters.page > 1) params.set("page", String(filters.page));
   return params;
 }
 
@@ -111,128 +116,57 @@ export function catalogHref(filters: CatalogFilters): string {
   return query ? `/shop?${query}` : "/shop";
 }
 
-function searchText(product: Product): string[] {
-  return [
-    product.name,
-    product.type,
-    product.category,
-    product.gender,
-    ...product.colors.map((c) => c.name),
-    ...(product.tags ?? []),
-  ]
-    .join(" ")
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-}
-
-/**
- * Simple keyword search: every word in the query must prefix-match a word of
- * the product (name, type, gender, colours, tags). "shoes" also matches "shoe".
- * Word matching keeps "men" from matching "women".
- */
-export function matchesSearch(product: Product, query: string): boolean {
-  const words = query
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-  if (words.length === 0) return true;
-  const tokens = searchText(product);
-  return words.every((word) => {
-    const singular =
-      word.length > 3 && word.endsWith("s") ? word.slice(0, -1) : word;
-    return tokens.some(
-      (token) => token.startsWith(word) || token.startsWith(singular),
-    );
-  });
-}
-
-export function filterProducts(
-  products: Product[],
-  filters: CatalogFilters,
-): Product[] {
+/** Translates the shop URL state into GET /products query parameters. */
+export function toProductQuery(filters: CatalogFilters): ProductQuery {
   const range = PRICE_RANGES.find((r) => r.value === filters.price);
-  return products.filter((p) => {
-    if (!matchesSearch(p, filters.q)) return false;
-    if (filters.category && p.category !== filters.category) return false;
-    // Men's and women's views include unisex items such as sneakers and bags.
-    if (filters.gender === "unisex" && p.gender !== "unisex") return false;
-    if (
-      filters.gender &&
-      filters.gender !== "unisex" &&
-      p.gender !== filters.gender &&
-      p.gender !== "unisex"
-    )
-      return false;
-    if (filters.size && !p.sizes.includes(filters.size)) return false;
-    if (range && (p.price < range.min || p.price > range.max)) return false;
-    if (filters.smartFit && !p.smartFit) return false;
-    if (filters.deals && !discountPercent(p.price, p.oldPrice)) return false;
-    if (filters.inStock && p.stock <= 0) return false;
-    if (filters.isNew && !p.isNew) return false;
-    return true;
-  });
+  return {
+    q: filters.q || undefined,
+    category: filters.category,
+    gender: filters.gender,
+    size: filters.size,
+    min_price: range?.min,
+    max_price: range?.max,
+    smart_fit: filters.smartFit || undefined,
+    on_sale: filters.deals || undefined,
+    in_stock: filters.inStock || undefined,
+    is_new: filters.isNew || undefined,
+    sort: filters.sort,
+    limit: PAGE_SIZE,
+    offset: (filters.page - 1) * PAGE_SIZE,
+  };
 }
 
-export function sortProducts(products: Product[], sort: SortOption): Product[] {
-  const sorted = [...products];
-  switch (sort) {
-    case "price-asc":
-      return sorted.sort((a, b) => a.price - b.price);
-    case "price-desc":
-      return sorted.sort((a, b) => b.price - a.price);
-    case "rating":
-      return sorted.sort(
-        (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,
-      );
-    case "discount":
-      return sorted.sort(
-        (a, b) =>
-          (discountPercent(b.price, b.oldPrice) ?? 0) -
-          (discountPercent(a.price, a.oldPrice) ?? 0),
-      );
-    default:
-      // "Recommended" is simply the curated catalog order, not an algorithm.
-      return sorted;
-  }
-}
-
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
-
-/** All sizes used by the catalog: clothing sizes first, then numeric sizes. */
-export function availableSizes(products: Product[]): string[] {
-  const sizes = [...new Set(products.flatMap((p) => p.sizes))];
-  const letters = SIZE_ORDER.filter((s) => sizes.includes(s));
-  const numbers = sizes
-    .filter((s) => !SIZE_ORDER.includes(s))
-    .sort((a, b) => Number(a) - Number(b));
-  return [...letters, ...numbers];
-}
-
-export function catalogTitle(filters: CatalogFilters): string {
+export function catalogTitle(
+  filters: CatalogFilters,
+  categories: Category[],
+): string {
   if (filters.q) return `Results for “${filters.q}”`;
   if (filters.deals) return "Deals";
   if (filters.isNew) return "New In";
-  if (filters.category === "shoes") return "Shoes";
-  if (filters.category === "accessories") return "Accessories";
+  const category = categories.find((c) => c.slug === filters.category);
+  if (category && category.slug !== "clothing") return category.name;
   if (filters.gender === "men") return "Men's Fashion";
   if (filters.gender === "women") return "Women's Fashion";
-  if (filters.category === "clothing") return "Clothing";
+  if (category) return category.name;
   return "Shop";
 }
 
 /** Human-readable list of active filters, each with the URL that removes it. */
 export function activeFilterChips(
   filters: CatalogFilters,
+  categories: Category[],
 ): { label: string; href: string }[] {
   const chips: { label: string; href: string }[] = [];
+  // Changing filters always returns to the first page.
   const without = (patch: Partial<CatalogFilters>) =>
-    catalogHref({ ...filters, ...patch });
+    catalogHref({ ...filters, ...patch, page: 1 });
   if (filters.q)
     chips.push({ label: `“${filters.q}”`, href: without({ q: "" }) });
   if (filters.category)
     chips.push({
-      label: CATEGORY_OPTIONS.find((o) => o.value === filters.category)!.label,
+      label:
+        categories.find((c) => c.slug === filters.category)?.name ??
+        filters.category,
       href: without({ category: undefined }),
     });
   if (filters.gender)

@@ -109,7 +109,7 @@ export function Header() {
           </Form>
 
           <nav
-            aria-label="Account"
+            aria-label="Account and cart"
             className="ml-auto flex items-center sm:gap-1"
           >
             {accountLinks.map(

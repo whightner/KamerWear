@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  SORT_OPTIONS,
-  type CatalogFilters,
-  type SortOption,
-} from "@/lib/catalog";
+import type { ApiSort } from "@/lib/api/types";
+import { SORT_OPTIONS, type CatalogFilters } from "@/lib/catalog";
 import { useCatalogNavigation } from "./useCatalogNavigation";
 
 export function SortSelect({
@@ -22,7 +19,7 @@ export function SortSelect({
       <select
         id="catalog-sort"
         value={filters.sort}
-        onChange={(event) => update({ sort: event.target.value as SortOption })}
+        onChange={(event) => update({ sort: event.target.value as ApiSort })}
         className="h-10 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink"
       >
         {SORT_OPTIONS.map((option) => (

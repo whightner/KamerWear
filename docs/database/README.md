@@ -45,8 +45,8 @@ python -m app.db.seed
 ```
 
 Loads the demo catalog (3 categories, 19 products, 69 images, 189 variants)
-from `backend/app/db/seed_data/catalog.json`, an export of the frontend mock
-catalog (`frontend/src/data/products.ts`). It is idempotent: rows are matched
+from `backend/app/db/seed_data/catalog.json`, the single source of demo
+catalog data (the storefront has no product data of its own). It is idempotent: rows are matched
 by slug or SKU and updated, so running it again never duplicates data.
 Inventory is reset to the demo stock levels (low stock, sold-out sizes and one
 out-of-stock product, as in the storefront).

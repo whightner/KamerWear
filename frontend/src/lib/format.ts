@@ -5,15 +5,6 @@ export function formatXaf(amount: number): string {
   return `${xafNumber.format(amount)} FCFA`;
 }
 
-/** Whole-number discount percentage, e.g. (28500, 39900) -> 29. */
-export function discountPercent(
-  price: number,
-  oldPrice?: number,
-): number | null {
-  if (!oldPrice || oldPrice <= price) return null;
-  return Math.round(((oldPrice - price) / oldPrice) * 100);
-}
-
 /** Short size hint for cards, e.g. ["S", "M", "L"] -> "Sizes S–L". */
 export function sizeHint(sizes: string[]): string {
   if (sizes.length === 0) return "";

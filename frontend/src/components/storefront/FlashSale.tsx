@@ -1,11 +1,17 @@
 import { Zap } from "lucide-react";
-import { flashSaleProducts } from "@/data/products";
+import { CatalogUnavailable } from "@/components/catalog/CatalogUnavailable";
+import type { ProductListItem } from "@/lib/api/types";
 import { Container } from "./Container";
 import { Countdown } from "./Countdown";
 import { ProductCard } from "./ProductCard";
 import { SectionHeading } from "./SectionHeading";
 
-export function FlashSale() {
+/** `products` is null when the catalog API could not be reached. */
+export function FlashSale({
+  products,
+}: {
+  products: ProductListItem[] | null;
+}) {
   return (
     <section
       id="flash-sale"
@@ -35,16 +41,20 @@ export function FlashSale() {
             </div>
           </SectionHeading>
 
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-            {flashSaleProducts.map((product) => (
-              <li key={product.slug}>
-                <ProductCard
-                  product={product}
-                  imageSizes="(min-width: 1280px) 210px, (min-width: 768px) 33vw, 50vw"
-                />
-              </li>
-            ))}
-          </ul>
+          {products === null ? (
+            <CatalogUnavailable compact />
+          ) : (
+            <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+              {products.map((product) => (
+                <li key={product.slug}>
+                  <ProductCard
+                    product={product}
+                    imageSizes="(min-width: 1280px) 210px, (min-width: 768px) 33vw, 50vw"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </Container>
     </section>

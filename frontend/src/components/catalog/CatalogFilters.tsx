@@ -3,8 +3,9 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { SlidersHorizontal, X } from "lucide-react";
+import type { Category } from "@/lib/api/types";
 import {
-  CATEGORY_OPTIONS,
+  SIZE_GROUPS,
   GENDER_OPTIONS,
   PRICE_RANGES,
   type CatalogFilters as Filters,
@@ -13,13 +14,14 @@ import { useCatalogNavigation } from "./useCatalogNavigation";
 
 interface CatalogFiltersProps {
   filters: Filters;
-  sizes: string[];
+  /** Active categories from the catalog API. */
+  categories: Category[];
   activeCount: number;
 }
 
 export function CatalogFilters({
   filters: serverFilters,
-  sizes,
+  categories,
   activeCount,
 }: CatalogFiltersProps) {
   const [open, setOpen] = useState(false);
@@ -68,13 +70,13 @@ export function CatalogFilters({
             checked={!filters.category}
             onChange={() => update({ category: undefined })}
           />
-          {CATEGORY_OPTIONS.map((option) => (
+          {categories.map((category) => (
             <RadioOption
-              key={option.value}
+              key={category.slug}
               name="category"
-              label={option.label}
-              checked={filters.category === option.value}
-              onChange={() => update({ category: option.value })}
+              label={category.name}
+              checked={filters.category === category.slug}
+              onChange={() => update({ category: category.slug })}
             />
           ))}
         </FilterGroup>
@@ -103,7 +105,7 @@ export function CatalogFilters({
             checked={!filters.size}
             onChange={() => update({ size: undefined })}
           />
-          {sizeGroups(sizes).map((group) => (
+          {SIZE_GROUPS.map((group) => (
             <div key={group.label}>
               <p className="mb-1.5 text-[11px] text-muted">{group.label}</p>
               <div className="flex flex-wrap gap-1.5">
@@ -163,22 +165,6 @@ export function CatalogFilters({
       </div>
     </div>
   );
-}
-
-/** Splits sizes into clothing letters, waist sizes and EU shoe sizes. */
-function sizeGroups(sizes: string[]) {
-  const isNumber = (size: string) => /^\d+$/.test(size);
-  return [
-    { label: "Clothing", sizes: sizes.filter((s) => !isNumber(s)) },
-    {
-      label: "Waist",
-      sizes: sizes.filter((s) => isNumber(s) && Number(s) < 38),
-    },
-    {
-      label: "Shoes (EU)",
-      sizes: sizes.filter((s) => isNumber(s) && Number(s) >= 38),
-    },
-  ].filter((group) => group.sizes.length > 0);
 }
 
 function SizeChip({

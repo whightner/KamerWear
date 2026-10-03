@@ -15,7 +15,8 @@ export function useCatalogNavigation(serverFilters: CatalogFilters) {
   const [filters, setFilters] = useOptimistic(serverFilters);
 
   function update(patch: Partial<CatalogFilters>) {
-    const next = { ...filters, ...patch };
+    // Any filter or sort change starts again from the first page.
+    const next = { ...filters, page: 1, ...patch };
     startTransition(() => {
       setFilters(next);
       router.push(catalogHref(next), { scroll: false });

@@ -11,8 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { formatXaf } from "@/lib/format";
-import { products } from "@/data/products";
-import { primaryImage } from "@/lib/products";
+import type { ProductListItem } from "@/lib/api/types";
 import { ComingSoonButton } from "./ComingSoonButton";
 import { Container } from "./Container";
 
@@ -22,9 +21,6 @@ const sources: { label: string; icon: LucideIcon }[] = [
   { label: "In a screenshot", icon: ImageIcon },
   { label: "In real life", icon: Store },
 ];
-
-// The scanned object is a sneaker, so every match shown is footwear.
-const similarShoes = products.filter((p) => p.category === "shoes").slice(0, 2);
 
 function FlowStep({ number, label }: { number: number; label: string }) {
   return (
@@ -37,7 +33,15 @@ function FlowStep({ number, label }: { number: number; label: string }) {
   );
 }
 
-export function VisualSearchBanner() {
+/**
+ * The scanned object is a sneaker, so every match shown is footwear.
+ * `similarShoes` are real catalog sneakers from the API (empty if it is unavailable).
+ */
+export function VisualSearchBanner({
+  similarShoes,
+}: {
+  similarShoes: ProductListItem[];
+}) {
   return (
     <section
       id="visual-search"
@@ -112,28 +116,30 @@ export function VisualSearchBanner() {
 
               <FlowStep number={3} label="Similar shoes" />
               <ul className="mt-2 grid grid-cols-3 gap-2">
-                {similarShoes.map((item) => (
-                  <li
-                    key={item.slug}
-                    className="overflow-hidden rounded-lg border border-line"
-                  >
-                    <div className="relative aspect-square bg-[#f2f2f2]">
-                      <Image
-                        src={primaryImage(item).src}
-                        alt=""
-                        fill
-                        sizes="130px"
-                        className="object-cover"
-                      />
-                    </div>
-                    <p className="truncate px-2 pt-1.5 text-[11px] font-semibold">
-                      {item.name}
-                    </p>
-                    <p className="px-2 pb-2 text-[11px] font-bold text-deal">
-                      {formatXaf(item.price)}
-                    </p>
-                  </li>
-                ))}
+                {similarShoes
+                  .filter((item) => item.primary_image)
+                  .map((item) => (
+                    <li
+                      key={item.slug}
+                      className="overflow-hidden rounded-lg border border-line"
+                    >
+                      <div className="relative aspect-square bg-[#f2f2f2]">
+                        <Image
+                          src={item.primary_image!.image_path}
+                          alt=""
+                          fill
+                          sizes="130px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="truncate px-2 pt-1.5 text-[11px] font-semibold">
+                        {item.name}
+                      </p>
+                      <p className="px-2 pb-2 text-[11px] font-bold text-deal">
+                        {formatXaf(item.price)}
+                      </p>
+                    </li>
+                  ))}
                 <li className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-line bg-cream/60 p-2 text-center">
                   <Footprints className="size-5 text-muted" />
                   <span className="text-[11px] font-semibold">
