@@ -29,14 +29,21 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations against the database in DATABASE_URL."""
+    """Run migrations against DATABASE_URL, or a connection passed in by tests."""
+    connection = config.attributes.get("connection")
+    if connection is not None:
+        _run_with(connection)
+        return
+
     connectable = create_engine(settings.database_url, poolclass=pool.NullPool)
-
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        _run_with(connection)
 
-        with context.begin_transaction():
-            context.run_migrations()
+
+def _run_with(connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 if context.is_offline_mode():

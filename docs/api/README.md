@@ -11,6 +11,7 @@ records the conventions that the generated docs do not show.
 - Field names use `snake_case`.
 - Money is an integer number of XAF (FCFA), e.g. `"price": 15000`.
   XAF has no minor unit, so there are no cents and no floats.
+- Ratings are plain numbers (`4.7`); they are not money.
 - Timestamps use ISO 8601 in UTC (e.g. `2026-10-03T14:30:00Z`).
 - Responses must make sense to any client (web now, mobile later).
 
@@ -39,6 +40,58 @@ Liveness check. It does not query the database.
   "service": "kamerwear-api"
 }
 ```
+
+### `GET /api/v1/categories`
+
+Active categories.
+
+```json
+[{ "id": 1, "name": "Shoes", "slug": "shoes" }]
+```
+
+### `GET /api/v1/products`
+
+Paginated product list: `{ "items": [...], "total": 19, "limit": 20, "offset": 0 }`.
+Each item has the card fields: `slug`, `name`, `category`, `gender`,
+`product_type`, `price`, `compare_at_price`, `discount_percent`,
+`rating_average`, `review_count`, `smart_fit`, `is_new`, `featured`,
+`primary_image`, `sizes`, `colors`, `in_stock`, `available_quantity`.
+
+| Parameter | Example | Meaning |
+| --- | --- | --- |
+| `limit` / `offset` | `limit=20&offset=0` | page size 1–100 (default 20), offset ≥ 0 |
+| `category` | `shoes` | category slug |
+| `gender` | `men` | `men`, `women` (both include unisex items) or `unisex` |
+| `size` | `M`, `43` | has an active variant in that size |
+| `min_price` / `max_price` | `10000` | FCFA, inclusive, on the product price |
+| `smart_fit`, `on_sale`, `in_stock`, `is_new` | `true` | boolean filters (`false` selects the opposite) |
+| `q` | `runner` | keywords; every word must match name, type, category, gender, colour or keywords |
+| `sort` | `price-asc` | `recommended` (featured first, then catalog order — a plain rule, not AI), `price-asc`, `price-desc`, `rating`, `discount` |
+
+Filters combine with AND. Invalid values return `422`.
+
+### `GET /api/v1/products/{slug}`
+
+Everything the product page needs in one response: the list fields plus
+`description`, `smart_fit_demo_size`, ordered `images` (with `color_name`) and
+`variants`:
+
+```json
+{ "id": 4, "sku": "UR02-BLACK-43", "size": "43", "color_name": "Black",
+  "color_hex": "#1b1a19", "price": 28500, "in_stock": true, "available_quantity": 1 }
+```
+
+A variant's `price` is its effective price (override or product price).
+`available_quantity` is `on_hand - reserved`, never below 0.
+
+Unknown slug: `404` with
+`{ "detail": { "code": "product_not_found", "message": "No product with slug 'x'." } }`.
+
+### `GET /api/v1/products/{slug}/similar`
+
+Demo "Find Similar", rule-based (no image AI): products of the same type first,
+then closely related types (hoodies, sweatshirts, jackets), and only if none
+match, the same category. Excludes the product itself. `limit` 1–12 (default 4).
 
 ## CORS
 

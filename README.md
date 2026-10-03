@@ -121,7 +121,8 @@ pip install -r requirements.txt
 # Configure: copy the example, then put your PostgreSQL password in DATABASE_URL
 cp .env.example .env               # Windows: copy .env.example .env
 
-alembic upgrade head               # apply migrations (none yet, but checks the connection)
+alembic upgrade head               # create the catalog tables
+python -m app.db.seed              # load the demo catalog (safe to run again)
 uvicorn app.main:app --reload      # http://localhost:8000
 ```
 
@@ -130,8 +131,10 @@ Useful URLs:
 - http://localhost:8000/ is the API identification
 - http://localhost:8000/api/v1/health is the health check
 - http://localhost:8000/docs is the interactive API documentation
+- http://localhost:8000/api/v1/products lists the demo catalog
 
-Run the tests (no database needed for the current tests):
+Run the tests. Catalog tests use a separate `kamerwear_test` database (created
+automatically) and are skipped if PostgreSQL is not running:
 
 ```bash
 pytest
@@ -176,4 +179,5 @@ npm run build
 | Database connection and Alembic setup | Done (Task 001), no tables yet |
 | Desktop storefront homepage (mock data) | Done (Task 002) |
 | Catalog, product pages, frontend cart and favorites (mock data) | Done (Task 003) |
-| Catalog API, checkout, payments, accounts, etc. | Not started (future tasks) |
+| Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004); frontend still uses mock data |
+| Frontend on the catalog API, checkout, payments, accounts, etc. | Not started (future tasks) |

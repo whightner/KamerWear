@@ -1,0 +1,1156 @@
+[
+  {
+    "slug": "urban-runner-02",
+    "name": "Urban Runner 02",
+    "description": "A lightweight everyday runner with a breathable knit upper and a cushioned sole for long days in the city.",
+    "gender": "unisex",
+    "category": "shoes",
+    "type": "Sneakers",
+    "group": "sneakers",
+    "price": 28500,
+    "oldPrice": 39900,
+    "rating": 4.7,
+    "reviewCount": 214,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/urban-runner-02/black-1.webp",
+            "alt": "Black knit running sneaker, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45"
+    ],
+    "soldOutSizes": [
+      "45"
+    ],
+    "stock": 5,
+    "smartFit": true,
+    "smartFitDemoSize": "43",
+    "tags": [
+      "running",
+      "trainers",
+      "shoe",
+      "black"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "flex-knit-runner",
+    "name": "Flex Knit Runner",
+    "description": "A sock-like knit sneaker with a sculpted sole. Easy to slip on and comfortable all day.",
+    "gender": "unisex",
+    "category": "shoes",
+    "type": "Sneakers",
+    "group": "sneakers",
+    "price": 24500,
+    "oldPrice": 32000,
+    "rating": 4.5,
+    "reviewCount": 98,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#2b2b2b",
+        "images": [
+          {
+            "src": "/images/products/flex-knit-runner/black-1.webp",
+            "alt": "Black knit sneaker, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "stock": 18,
+    "smartFit": true,
+    "smartFitDemoSize": "42",
+    "isNew": true,
+    "tags": [
+      "running",
+      "trainers",
+      "shoe",
+      "knit"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "core-heavy-tee",
+    "name": "Core Heavy Tee",
+    "description": "A heavyweight crew-neck T-shirt with a relaxed fit. The everyday basic that keeps its shape.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "T-shirt",
+    "group": "tees",
+    "price": 5500,
+    "oldPrice": 8000,
+    "rating": 4.6,
+    "reviewCount": 321,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/core-heavy-tee/black-1.webp",
+            "alt": "Black crew-neck T-shirt, front view"
+          }
+        ]
+      },
+      {
+        "slug": "orange",
+        "name": "Orange",
+        "swatch": "#f07c22",
+        "images": [
+          {
+            "src": "/images/products/core-heavy-tee/orange-1.webp",
+            "alt": "Orange crew-neck T-shirt, front view"
+          },
+          {
+            "src": "/images/products/core-heavy-tee/orange-2.webp",
+            "alt": "Orange crew-neck T-shirt, back view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Coral",
+        "swatch": "#e98a8a",
+        "images": [
+          {
+            "src": "/images/products/core-heavy-tee/red-1.webp",
+            "alt": "Coral crew-neck T-shirt, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "soldOutSizes": [
+      "XXL"
+    ],
+    "stock": 40,
+    "tags": [
+      "tee",
+      "top",
+      "basic"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "classic-hoodie",
+    "name": "Classic Hoodie",
+    "description": "A soft fleece pullover hoodie with a kangaroo pocket and a lined hood.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Hoodie",
+    "group": "hoodies",
+    "price": 14500,
+    "oldPrice": 19500,
+    "rating": 4.8,
+    "reviewCount": 187,
+    "colors": [
+      {
+        "slug": "olive",
+        "name": "Olive",
+        "swatch": "#6f6a4c",
+        "images": [
+          {
+            "src": "/images/products/classic-hoodie/olive-1.webp",
+            "alt": "Olive pullover hoodie, front view"
+          },
+          {
+            "src": "/images/products/classic-hoodie/olive-2.webp",
+            "alt": "Olive pullover hoodie, back view"
+          },
+          {
+            "src": "/images/products/classic-hoodie/olive-3.webp",
+            "alt": "Olive pullover hoodie, close-up detail"
+          }
+        ]
+      },
+      {
+        "slug": "purple",
+        "name": "Lavender",
+        "swatch": "#a69be0",
+        "images": [
+          {
+            "src": "/images/products/classic-hoodie/purple-1.webp",
+            "alt": "Lavender pullover hoodie, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Red",
+        "swatch": "#d7262f",
+        "images": [
+          {
+            "src": "/images/products/classic-hoodie/red-1.webp",
+            "alt": "Red pullover hoodie, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 22,
+    "smartFit": true,
+    "smartFitDemoSize": "M",
+    "tags": [
+      "streetwear",
+      "sweat",
+      "pullover"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "everyday-cargo",
+    "name": "Everyday Cargo",
+    "description": "Relaxed cargo trousers in a durable cotton blend, with roomy side pockets.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Trousers",
+    "group": "bottoms",
+    "price": 12500,
+    "oldPrice": 17000,
+    "rating": 4.4,
+    "reviewCount": 76,
+    "colors": [
+      {
+        "slug": "navy",
+        "name": "Royal blue",
+        "swatch": "#1f3fb5",
+        "images": [
+          {
+            "src": "/images/products/everyday-cargo/navy-1.webp",
+            "alt": "Royal blue cargo trousers, front view"
+          }
+        ]
+      },
+      {
+        "slug": "brown",
+        "name": "Khaki",
+        "swatch": "#b9ab8c",
+        "images": [
+          {
+            "src": "/images/products/everyday-cargo/brown-1.webp",
+            "alt": "Khaki cargo trousers, front view"
+          },
+          {
+            "src": "/images/products/everyday-cargo/brown-2.webp",
+            "alt": "Khaki cargo trousers, back view"
+          },
+          {
+            "src": "/images/products/everyday-cargo/brown-3.webp",
+            "alt": "Khaki cargo trousers, close-up detail"
+          }
+        ]
+      },
+      {
+        "slug": "green",
+        "name": "Green",
+        "swatch": "#1e7b3a",
+        "images": [
+          {
+            "src": "/images/products/everyday-cargo/green-1.webp",
+            "alt": "Green cargo trousers, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "30",
+      "32",
+      "34",
+      "36"
+    ],
+    "soldOutSizes": [
+      "36"
+    ],
+    "stock": 4,
+    "tags": [
+      "streetwear",
+      "pants",
+      "cargo"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "city-bomber-jacket",
+    "name": "City Bomber Jacket",
+    "description": "A light bomber jacket with ribbed cuffs and hem, and a utility pocket on the sleeve.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Jacket",
+    "group": "outerwear",
+    "price": 22500,
+    "oldPrice": 30000,
+    "rating": 4.6,
+    "reviewCount": 64,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/city-bomber-jacket/black-1.webp",
+            "alt": "Black bomber jacket, front view"
+          },
+          {
+            "src": "/images/products/city-bomber-jacket/black-2.webp",
+            "alt": "Black bomber jacket, back view"
+          },
+          {
+            "src": "/images/products/city-bomber-jacket/black-3.webp",
+            "alt": "Black bomber jacket, close-up detail"
+          }
+        ]
+      },
+      {
+        "slug": "green",
+        "name": "Green",
+        "swatch": "#1e8a4a",
+        "images": [
+          {
+            "src": "/images/products/city-bomber-jacket/green-1.webp",
+            "alt": "Green bomber jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Red",
+        "swatch": "#d8372f",
+        "images": [
+          {
+            "src": "/images/products/city-bomber-jacket/red-1.webp",
+            "alt": "Red bomber jacket, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 12,
+    "smartFit": true,
+    "smartFitDemoSize": "L",
+    "tags": [
+      "streetwear",
+      "outerwear",
+      "bomber"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "raglan-crew-sweatshirt",
+    "name": "Raglan Crew Sweatshirt",
+    "description": "A colour-block raglan sweatshirt in brushed cotton with a ribbed crew neck.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Sweatshirt",
+    "group": "hoodies",
+    "price": 11000,
+    "rating": 4.3,
+    "reviewCount": 52,
+    "colors": [
+      {
+        "slug": "mint",
+        "name": "Mint",
+        "swatch": "#7fcfa5",
+        "images": [
+          {
+            "src": "/images/products/raglan-crew-sweatshirt/mint-1.webp",
+            "alt": "Mint raglan sweatshirt, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Pink",
+        "swatch": "#ef8f92",
+        "images": [
+          {
+            "src": "/images/products/raglan-crew-sweatshirt/red-1.webp",
+            "alt": "Pink raglan sweatshirt, front view"
+          }
+        ]
+      },
+      {
+        "slug": "white",
+        "name": "White",
+        "swatch": "#f4f1ea",
+        "images": [
+          {
+            "src": "/images/products/raglan-crew-sweatshirt/white-1.webp",
+            "alt": "White raglan sweatshirt, front view"
+          },
+          {
+            "src": "/images/products/raglan-crew-sweatshirt/white-2.webp",
+            "alt": "White raglan sweatshirt, back view"
+          },
+          {
+            "src": "/images/products/raglan-crew-sweatshirt/white-3.webp",
+            "alt": "White raglan sweatshirt, close-up detail"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 0,
+    "tags": [
+      "sweat",
+      "crewneck"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "striped-zip-hoodie",
+    "name": "Striped Zip Hoodie",
+    "description": "A striped zip-through hoodie with a drawstring hood. Easy to layer.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Hoodie",
+    "group": "hoodies",
+    "price": 15500,
+    "rating": 4.5,
+    "reviewCount": 63,
+    "colors": [
+      {
+        "slug": "green",
+        "name": "Sage stripe",
+        "swatch": "#7f9a8a",
+        "images": [
+          {
+            "src": "/images/products/striped-zip-hoodie/green-1.webp",
+            "alt": "Sage stripe striped zip hoodie, front view"
+          },
+          {
+            "src": "/images/products/striped-zip-hoodie/green-2.webp",
+            "alt": "Sage stripe striped zip hoodie, back view"
+          },
+          {
+            "src": "/images/products/striped-zip-hoodie/green-3.webp",
+            "alt": "Sage stripe striped zip hoodie, close-up detail"
+          }
+        ]
+      },
+      {
+        "slug": "blue",
+        "name": "Grey stripe",
+        "swatch": "#8b98a5",
+        "images": [
+          {
+            "src": "/images/products/striped-zip-hoodie/blue-1.webp",
+            "alt": "Grey stripe striped zip hoodie, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Plum stripe",
+        "swatch": "#9b6b78",
+        "images": [
+          {
+            "src": "/images/products/striped-zip-hoodie/red-1.webp",
+            "alt": "Plum stripe striped zip hoodie, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 14,
+    "smartFit": true,
+    "smartFitDemoSize": "M",
+    "isNew": true,
+    "tags": [
+      "streetwear",
+      "zip"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "quilted-puffer-jacket",
+    "name": "Quilted Puffer Jacket",
+    "description": "A warm quilted puffer jacket with a stand collar, for cooler evenings and travel.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Jacket",
+    "group": "outerwear",
+    "price": 29500,
+    "oldPrice": 35000,
+    "rating": 4.7,
+    "reviewCount": 41,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/quilted-puffer-jacket/black-1.webp",
+            "alt": "Black quilted puffer jacket, front view"
+          },
+          {
+            "src": "/images/products/quilted-puffer-jacket/black-2.webp",
+            "alt": "Black quilted puffer jacket, back view"
+          },
+          {
+            "src": "/images/products/quilted-puffer-jacket/black-3.webp",
+            "alt": "Black quilted puffer jacket, close-up detail"
+          }
+        ]
+      },
+      {
+        "slug": "green",
+        "name": "Green",
+        "swatch": "#1e8a4a",
+        "images": [
+          {
+            "src": "/images/products/quilted-puffer-jacket/green-1.webp",
+            "alt": "Green quilted puffer jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Red",
+        "swatch": "#d8372f",
+        "images": [
+          {
+            "src": "/images/products/quilted-puffer-jacket/red-1.webp",
+            "alt": "Red quilted puffer jacket, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "stock": 8,
+    "smartFit": true,
+    "smartFitDemoSize": "L",
+    "isNew": true,
+    "tags": [
+      "outerwear",
+      "puffer",
+      "coat"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "core-joggers",
+    "name": "Core Joggers",
+    "description": "Soft jersey joggers with an elastic waistband and a straight, relaxed leg.",
+    "gender": "men",
+    "category": "clothing",
+    "type": "Trousers",
+    "group": "bottoms",
+    "price": 9500,
+    "rating": 4.4,
+    "reviewCount": 88,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/core-joggers/black-1.webp",
+            "alt": "Black jersey joggers, front view"
+          }
+        ]
+      },
+      {
+        "slug": "grey",
+        "name": "Grey",
+        "swatch": "#a7a7a7",
+        "images": [
+          {
+            "src": "/images/products/core-joggers/grey-1.webp",
+            "alt": "Grey jersey joggers, front view"
+          },
+          {
+            "src": "/images/products/core-joggers/grey-2.webp",
+            "alt": "Grey jersey joggers, back view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 35,
+    "isNew": true,
+    "tags": [
+      "pants",
+      "sweatpants",
+      "joggers"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "sunset-zip-hoodie",
+    "name": "Sunset Zip Hoodie",
+    "description": "A lightweight zip-up hoodie with three-quarter sleeves and a fitted shape.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "Hoodie",
+    "group": "hoodies",
+    "price": 13500,
+    "oldPrice": 16500,
+    "rating": 4.7,
+    "reviewCount": 143,
+    "colors": [
+      {
+        "slug": "orange",
+        "name": "Orange",
+        "swatch": "#f6b04d",
+        "images": [
+          {
+            "src": "/images/products/sunset-zip-hoodie/orange-1.webp",
+            "alt": "Orange zip-up hoodie, front view"
+          }
+        ]
+      },
+      {
+        "slug": "purple",
+        "name": "Lilac",
+        "swatch": "#c5b5ef",
+        "images": [
+          {
+            "src": "/images/products/sunset-zip-hoodie/purple-1.webp",
+            "alt": "Lilac zip-up hoodie, front view"
+          }
+        ]
+      },
+      {
+        "slug": "white",
+        "name": "White",
+        "swatch": "#f4f1ea",
+        "images": [
+          {
+            "src": "/images/products/sunset-zip-hoodie/white-1.webp",
+            "alt": "White zip-up hoodie, front view"
+          },
+          {
+            "src": "/images/products/sunset-zip-hoodie/white-2.webp",
+            "alt": "White zip-up hoodie, back view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "stock": 9,
+    "smartFit": true,
+    "smartFitDemoSize": "S",
+    "tags": [
+      "zip"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "featherlight-puffer",
+    "name": "Featherlight Puffer",
+    "description": "A packable hooded puffer jacket that is warm without the bulk.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "Jacket",
+    "group": "outerwear",
+    "price": 26500,
+    "rating": 4.8,
+    "reviewCount": 91,
+    "colors": [
+      {
+        "slug": "blue",
+        "name": "Blue",
+        "swatch": "#1f86e0",
+        "images": [
+          {
+            "src": "/images/products/featherlight-puffer/blue-1.webp",
+            "alt": "Blue hooded puffer jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "green",
+        "name": "Mint",
+        "swatch": "#6fcf9f",
+        "images": [
+          {
+            "src": "/images/products/featherlight-puffer/green-1.webp",
+            "alt": "Mint hooded puffer jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "purple",
+        "name": "Purple",
+        "swatch": "#5a35a8",
+        "images": [
+          {
+            "src": "/images/products/featherlight-puffer/purple-1.webp",
+            "alt": "Purple hooded puffer jacket, front view"
+          },
+          {
+            "src": "/images/products/featherlight-puffer/purple-2.webp",
+            "alt": "Purple hooded puffer jacket, back view"
+          },
+          {
+            "src": "/images/products/featherlight-puffer/purple-3.webp",
+            "alt": "Purple hooded puffer jacket, close-up detail"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 15,
+    "smartFit": true,
+    "smartFitDemoSize": "M",
+    "isNew": true,
+    "tags": [
+      "outerwear",
+      "puffer",
+      "coat"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "trail-zip-jacket",
+    "name": "Trail Zip Jacket",
+    "description": "A soft-shell zip jacket with a high collar. Light enough for everyday wear.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "Jacket",
+    "group": "outerwear",
+    "price": 18500,
+    "oldPrice": 26500,
+    "rating": 4.6,
+    "reviewCount": 57,
+    "colors": [
+      {
+        "slug": "orange",
+        "name": "Amber",
+        "swatch": "#e3a33a",
+        "images": [
+          {
+            "src": "/images/products/trail-zip-jacket/orange-1.webp",
+            "alt": "Amber soft-shell jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Pink",
+        "swatch": "#f17d8f",
+        "images": [
+          {
+            "src": "/images/products/trail-zip-jacket/red-1.webp",
+            "alt": "Pink soft-shell jacket, front view"
+          }
+        ]
+      },
+      {
+        "slug": "white",
+        "name": "White",
+        "swatch": "#f4f1ea",
+        "images": [
+          {
+            "src": "/images/products/trail-zip-jacket/white-1.webp",
+            "alt": "White soft-shell jacket, front view"
+          },
+          {
+            "src": "/images/products/trail-zip-jacket/white-2.webp",
+            "alt": "White soft-shell jacket, back view"
+          },
+          {
+            "src": "/images/products/trail-zip-jacket/white-3.webp",
+            "alt": "White soft-shell jacket, close-up detail"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "stock": 11,
+    "smartFit": true,
+    "smartFitDemoSize": "S",
+    "isNew": true,
+    "tags": [
+      "outerwear",
+      "softshell"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "utility-jogger",
+    "name": "Utility Jogger",
+    "description": "Relaxed joggers with cargo pockets, a drawstring waist and cuffed ankles.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "Trousers",
+    "group": "bottoms",
+    "price": 10500,
+    "oldPrice": 13000,
+    "rating": 4.5,
+    "reviewCount": 118,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/utility-jogger/black-1.webp",
+            "alt": "Black utility joggers, front view"
+          }
+        ]
+      },
+      {
+        "slug": "blue",
+        "name": "Blue",
+        "swatch": "#1f4fd0",
+        "images": [
+          {
+            "src": "/images/products/utility-jogger/blue-1.webp",
+            "alt": "Blue utility joggers, front view"
+          },
+          {
+            "src": "/images/products/utility-jogger/blue-2.webp",
+            "alt": "Blue utility joggers, back view"
+          }
+        ]
+      },
+      {
+        "slug": "purple",
+        "name": "Purple",
+        "swatch": "#5b35b5",
+        "images": [
+          {
+            "src": "/images/products/utility-jogger/purple-1.webp",
+            "alt": "Purple utility joggers, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "stock": 30,
+    "tags": [
+      "streetwear",
+      "pants",
+      "cargo",
+      "joggers"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "essential-v-tee",
+    "name": "Essential V-Neck Tee",
+    "description": "A soft, slim-fit V-neck T-shirt for everyday wear.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "T-shirt",
+    "group": "tees",
+    "price": 4500,
+    "rating": 4.4,
+    "reviewCount": 205,
+    "colors": [
+      {
+        "slug": "grey",
+        "name": "Grey",
+        "swatch": "#7a7a7a",
+        "images": [
+          {
+            "src": "/images/products/essential-v-tee/grey-1.webp",
+            "alt": "Grey V-neck T-shirt, front view"
+          }
+        ]
+      },
+      {
+        "slug": "purple",
+        "name": "Purple",
+        "swatch": "#8e3bb0",
+        "images": [
+          {
+            "src": "/images/products/essential-v-tee/purple-1.webp",
+            "alt": "Purple V-neck T-shirt, front view"
+          },
+          {
+            "src": "/images/products/essential-v-tee/purple-2.webp",
+            "alt": "Purple V-neck T-shirt, back view"
+          }
+        ]
+      },
+      {
+        "slug": "red",
+        "name": "Red",
+        "swatch": "#e2262c",
+        "images": [
+          {
+            "src": "/images/products/essential-v-tee/red-1.webp",
+            "alt": "Red V-neck T-shirt, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 25,
+    "tags": [
+      "tee",
+      "top",
+      "basic"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "relaxed-crew-tee",
+    "name": "Relaxed Crew Tee",
+    "description": "A breathable crew-neck T-shirt with a relaxed, easy fit.",
+    "gender": "women",
+    "category": "clothing",
+    "type": "T-shirt",
+    "group": "tees",
+    "price": 5000,
+    "rating": 4.5,
+    "reviewCount": 132,
+    "colors": [
+      {
+        "slug": "black",
+        "name": "Black",
+        "swatch": "#1b1a19",
+        "images": [
+          {
+            "src": "/images/products/relaxed-crew-tee/black-1.webp",
+            "alt": "Black crew-neck T-shirt, front view"
+          },
+          {
+            "src": "/images/products/relaxed-crew-tee/black-2.webp",
+            "alt": "Black crew-neck T-shirt, back view"
+          }
+        ]
+      },
+      {
+        "slug": "green",
+        "name": "Green",
+        "swatch": "#1d8a4c",
+        "images": [
+          {
+            "src": "/images/products/relaxed-crew-tee/green-1.webp",
+            "alt": "Green crew-neck T-shirt, front view"
+          }
+        ]
+      },
+      {
+        "slug": "yellow",
+        "name": "Lemon",
+        "swatch": "#f2e66b",
+        "images": [
+          {
+            "src": "/images/products/relaxed-crew-tee/yellow-1.webp",
+            "alt": "Lemon crew-neck T-shirt, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "stock": 28,
+    "isNew": true,
+    "tags": [
+      "tee",
+      "top",
+      "basic"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "canvas-messenger-bag",
+    "name": "Canvas Messenger Bag",
+    "description": "A washed canvas messenger bag with a padded laptop sleeve and two buckled front pockets.",
+    "gender": "unisex",
+    "category": "accessories",
+    "type": "Bag",
+    "group": "bags",
+    "price": 15500,
+    "oldPrice": 19000,
+    "rating": 4.6,
+    "reviewCount": 47,
+    "colors": [
+      {
+        "slug": "grey",
+        "name": "Grey",
+        "swatch": "#8a8a85",
+        "images": [
+          {
+            "src": "/images/products/canvas-messenger-bag/grey-1.webp",
+            "alt": "Grey canvas messenger bag, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [],
+    "stock": 3,
+    "tags": [
+      "messenger",
+      "laptop",
+      "shoulder"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "everyday-backpack",
+    "name": "Everyday Backpack",
+    "description": "A sturdy backpack with a laptop compartment, side pockets and bungee cord on the front.",
+    "gender": "unisex",
+    "category": "accessories",
+    "type": "Bag",
+    "group": "bags",
+    "price": 17500,
+    "oldPrice": 21000,
+    "rating": 4.5,
+    "reviewCount": 73,
+    "colors": [
+      {
+        "slug": "grey",
+        "name": "Grey",
+        "swatch": "#8a8a85",
+        "images": [
+          {
+            "src": "/images/products/everyday-backpack/grey-1.webp",
+            "alt": "Grey backpack, front view"
+          }
+        ]
+      },
+      {
+        "slug": "blue",
+        "name": "Blue",
+        "swatch": "#1f5fc0",
+        "images": [
+          {
+            "src": "/images/products/everyday-backpack/blue-1.webp",
+            "alt": "Blue backpack, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [],
+    "stock": 16,
+    "tags": [
+      "backpack",
+      "school",
+      "laptop"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "weekend-duffel",
+    "name": "Weekend Duffel",
+    "description": "A roomy duffel bag with grab handles and a shoulder strap for short trips.",
+    "gender": "unisex",
+    "category": "accessories",
+    "type": "Bag",
+    "group": "bags",
+    "price": 21000,
+    "rating": 4.3,
+    "reviewCount": 29,
+    "colors": [
+      {
+        "slug": "navy",
+        "name": "Navy",
+        "swatch": "#262c4a",
+        "images": [
+          {
+            "src": "/images/products/weekend-duffel/navy-1.webp",
+            "alt": "Navy duffel bag, front view"
+          }
+        ]
+      }
+    ],
+    "sizes": [],
+    "stock": 7,
+    "tags": [
+      "travel",
+      "gym",
+      "duffel"
+    ],
+    "featured": false
+  }
+]
