@@ -85,6 +85,17 @@ machine, and
 [../architecture/commerce.md](../architecture/commerce.md) for the inventory
 policy and row locking.
 
+## Visual search schema
+
+| Table | Purpose | Notes |
+| --- | --- | --- |
+| `product_image_embeddings` | One embedding per product photo and model | `product_image_id` (cascade delete), `model_name` (unique together), `dimensions`, `embedding` (L2-normalised float32 bytes, 2 KB for 512 numbers), `source_path` and `source_sha256` (what was encoded, for stale detection) |
+| `visual_search_index_runs` | Log of index builds | `trigger` (cli/admin), `status`, indexed/unchanged/failed/removed counts, `started_at`, `finished_at` |
+
+No pgvector: the ~70 vectors are compared with NumPy (see
+[../architecture/visual-search.md](../architecture/visual-search.md)).
+Uploaded search photos are never stored.
+
 ## Seed data
 
 ```bash

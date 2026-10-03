@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowDown,
   Camera,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import { formatXaf } from "@/lib/format";
 import type { ProductListItem } from "@/lib/api/types";
-import { ComingSoonButton } from "./ComingSoonButton";
 import { Container } from "./Container";
 
 const sources: { label: string; icon: LucideIcon }[] = [
@@ -79,18 +79,17 @@ export function VisualSearchBanner({
             </ul>
 
             <div className="mt-8">
-              <ComingSoonButton
+              <Link
+                href="/visual-search"
                 className="inline-flex h-12 items-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-ink hover:bg-cream"
-                message="Search by image is in development and will be available soon."
-                messageClassName="text-white/75"
               >
                 <Camera className="size-4" aria-hidden="true" />
                 Search by Image
-              </ComingSoonButton>
+              </Link>
             </div>
           </div>
 
-          {/* Illustration of the planned flow: photo of a shoe → visual search → similar shoes. */}
+          {/* Illustration of how it works (not live results): photo of a shoe → visual search → similar shoes. */}
           <div aria-hidden="true" className="mx-auto w-full max-w-md">
             <div className="rounded-2xl bg-white p-4 text-ink">
               <FlowStep number={1} label="Photo of a shoe" />

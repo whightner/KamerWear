@@ -1,0 +1,12 @@
+# Optional: the pretrained vision model behind visual search.
+# Install after requirements.txt:  pip install -r requirements-visual-search.txt
+# Without these packages the shop works normally and visual search answers
+# "visual_search_unavailable".
+#
+# OpenCLIP (MIT) runs the ViT-B-32 model; weights (laion2b_s34b_b79k, MIT) are
+# downloaded once by `python -m app.ai.prepare_visual_search`.
+# Tip for CPU-only machines: install torch from the CPU wheel index first
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch>=2.9
+torchvision>=0.24
+open_clip_torch>=3.0

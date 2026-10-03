@@ -4,6 +4,7 @@ from app.api.v1.endpoints import (
     addresses,
     admin_catalog,
     admin_store,
+    admin_visual_search,
     auth,
     cart,
     categories,
@@ -12,6 +13,7 @@ from app.api.v1.endpoints import (
     orders,
     products,
     users,
+    visual_search,
 )
 
 api_router = APIRouter()
@@ -26,3 +28,5 @@ api_router.include_router(checkout.router)
 api_router.include_router(orders.router)
 api_router.include_router(admin_store.router)
 api_router.include_router(admin_catalog.router)
+api_router.include_router(visual_search.router)
+api_router.include_router(admin_visual_search.router)

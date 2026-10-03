@@ -105,7 +105,7 @@ export function Header({ account }: { account: HeaderAccount | null }) {
               className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted"
             />
             <Link
-              href="/#visual-search"
+              href="/visual-search"
               aria-label="Search by image"
               title="Search by image"
               className="mr-1 flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-ink hover:bg-sand"

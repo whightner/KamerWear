@@ -42,7 +42,10 @@ function Metric({
 export default async function AdminDashboard() {
   const token = await adminToken("/admin");
   if (!token) return null;
-  const result = await adminApi.overview(token);
+  const [result, visual] = await Promise.all([
+    adminApi.overview(token),
+    adminApi.visualSearchStatus(token),
+  ]);
 
   return (
     <>
@@ -85,6 +88,27 @@ export default async function AdminDashboard() {
               value={result.data.metrics.out_of_stock_variants}
               href="/admin/inventory?filter=out"
               tone={result.data.metrics.out_of_stock_variants > 0 ? "alert" : "default"}
+            />
+            <Metric
+              label="Visual search"
+              value={visual.ok ? (visual.data.ready ? "Ready" : "Not ready") : "Unknown"}
+              hint={
+                visual.ok
+                  ? `${visual.data.indexed_images}/${visual.data.active_images} photos indexed${
+                      visual.data.unindexed_images.length + visual.data.stale_images.length > 0
+                        ? " · update needed"
+                        : ""
+                    }`
+                  : "Status unavailable"
+              }
+              href="/admin/visual-search"
+              tone={
+                !visual.ok || !visual.data.ready
+                  ? "alert"
+                  : visual.data.unindexed_images.length + visual.data.stale_images.length > 0
+                    ? "warn"
+                    : "default"
+              }
             />
           </div>
 

@@ -7,6 +7,10 @@ import type {
   ProductListItem,
   ProductQuery,
 } from "./types";
+import type {
+  VisualSimilarResponse,
+  VisualSimilarResult,
+} from "@/lib/visual-search/types";
 
 // Typed access to the catalog API. Server-only: pages call these during
 // rendering, so the browser never talks to the API directly.
@@ -97,4 +101,28 @@ export function getSimilarProducts(
   return request<ProductListItem[]>(
     `/products/${encodeURIComponent(slug)}/similar?limit=${limit}`,
   );
+}
+
+/**
+ * Visually similar products (image embeddings), separate from the rule-based
+ * /similar list. Never throws for API problems: returns the error code instead.
+ */
+export async function getVisualSimilar(
+  slug: string,
+  limit = 4,
+): Promise<VisualSimilarResult> {
+  let response: Response;
+  try {
+    response = await fetch(
+      apiUrl(`/products/${encodeURIComponent(slug)}/visual-similar?limit=${limit}`),
+      { cache: "no-store", headers: { Accept: "application/json" } },
+    );
+  } catch (cause) {
+    if (!(cause instanceof TypeError)) throw cause;
+    return { ok: false, code: "unavailable" };
+  }
+  const body: unknown = await response.json().catch(() => null);
+  if (response.ok) return { ok: true, data: body as VisualSimilarResponse };
+  const code = (body as { detail?: { code?: string } } | null)?.detail?.code;
+  return { ok: false, code: code ?? "unavailable" };
 }

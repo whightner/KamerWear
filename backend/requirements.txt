@@ -11,6 +11,12 @@ argon2-cffi>=25.1
 PyJWT>=2.10
 email-validator>=2.2
 
+# Visual search: image decoding/validation and vector maths. The neural network
+# itself is optional: see requirements-visual-search.txt.
+pillow>=12.0
+numpy>=2.3
+python-multipart>=0.0.20  # multipart image uploads
+
 # Database
 sqlalchemy>=2.0,<3
 psycopg[binary]>=3.2,<4

@@ -11,6 +11,8 @@ import type {
   InventoryRow,
   Overview,
   Paged,
+  RebuildResult,
+  VisualSearchStatus,
 } from "./types";
 
 // Server-side calls to the admin API. FastAPI checks that the token belongs to
@@ -35,6 +37,10 @@ const send = <T>(token: string, method: string, path: string, body?: unknown) =>
   call<T>(path, { method, body, accessToken: token });
 
 export const adminApi = {
+  visualSearchStatus: (t: string) => get<VisualSearchStatus>(t, "/admin/visual-search/status"),
+  rebuildVisualSearch: (t: string) =>
+    send<RebuildResult>(t, "POST", "/admin/visual-search/rebuild"),
+
   overview: (t: string) => get<Overview>(t, "/admin/overview"),
 
   categories: (t: string) => get<AdminCategory[]>(t, "/admin/categories"),

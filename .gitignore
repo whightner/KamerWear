@@ -13,6 +13,8 @@ venv/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+# Downloaded ML model weights (visual search)
+backend/.model-cache/
 *.egg-info/
 
 # Node / Next.js (frontend/ may also have its own .gitignore)

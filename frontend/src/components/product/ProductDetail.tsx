@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ScanSearch, ShoppingBag, Star, Zap } from "lucide-react";
+import type { VisualSimilarResult } from "@/lib/visual-search/types";
 import type {
   ProductDetail as ApiProduct,
   ProductImage,
@@ -30,8 +31,10 @@ import { SmartFitBlock } from "./SmartFitBlock";
 
 interface ProductDetailProps {
   product: ApiProduct;
-  /** From GET /products/{slug}/similar; null if that request failed. */
-  similar: ProductListItem[] | null;
+  /** Rule-based related items (GET /products/{slug}/similar); null if that failed. */
+  related: ProductListItem[] | null;
+  /** Visually similar items from image embeddings (GET /products/{slug}/visual-similar). */
+  visualSimilar: VisualSimilarResult;
 }
 
 /** Photos for a colour, falling back to colour-neutral photos, then all photos. */
@@ -42,7 +45,7 @@ function galleryFor(images: ProductImage[], colorName: string): ProductImage[] {
   return general.length ? general : images;
 }
 
-export function ProductDetail({ product, similar }: ProductDetailProps) {
+export function ProductDetail({ product, related, visualSimilar }: ProductDetailProps) {
   const router = useRouter();
   const { addToCart, cartPending } = useStore();
   const [colorName, setColorName] = useState(product.colors[0]?.name ?? "");
@@ -507,23 +510,25 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
             className="flex items-center gap-2 text-xl font-extrabold text-ink"
           >
             <ScanSearch className="size-5" aria-hidden="true" />
-            Similar to {product.name}
+            Visually similar to {product.name}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Demo: rule-based matching by product type. Image-based matching
-            comes later.
+            Found by comparing product photos with a pretrained image model, so
+            results look alike rather than just sharing a category.
           </p>
-          {similar === null ? (
+          {!visualSimilar.ok ? (
             <p className="mt-5 text-sm text-ink" role="alert">
-              We couldn&apos;t load similar items right now. Please try again
-              later.
+              {visualSimilar.code === "product_not_indexed" ||
+              visualSimilar.code === "visual_search_not_ready"
+                ? "Visual similarity isn't available for this product yet."
+                : "Visual similarity is unavailable right now. Please try again later."}
             </p>
-          ) : similar.length > 0 ? (
+          ) : visualSimilar.data.items.length > 0 ? (
             <ul className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-              {similar.map((item) => (
-                <li key={item.id}>
+              {visualSimilar.data.items.map((item) => (
+                <li key={item.product.id}>
                   <ProductCard
-                    product={item}
+                    product={item.product}
                     imageSizes="(min-width: 768px) 25vw, 50vw"
                   />
                 </li>
@@ -531,7 +536,7 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
             </ul>
           ) : (
             <p className="mt-5 text-sm text-ink">
-              No similar items in the catalog yet.{" "}
+              No visually similar items in the catalog yet.{" "}
               <Link
                 href="/shop"
                 className="font-semibold underline underline-offset-2"
@@ -540,6 +545,22 @@ export function ProductDetail({ product, similar }: ProductDetailProps) {
               </Link>
             </p>
           )}
+        </section>
+      )}
+
+      {related && related.length > 0 && (
+        <section aria-labelledby="related-heading" className="mt-12">
+          <h2 id="related-heading" className="text-xl font-extrabold text-ink">
+            Related products
+          </h2>
+          <p className="mt-1 text-sm text-muted">More {product.product_type.toLowerCase()} styles from our catalog.</p>
+          <ul className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+            {related.map((item) => (
+              <li key={item.id}>
+                <ProductCard product={item} imageSizes="(min-width: 768px) 25vw, 50vw" />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </>

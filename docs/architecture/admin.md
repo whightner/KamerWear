@@ -49,6 +49,7 @@ automatically.
 | `/admin/inventory` | Stock per variant, with filters |
 | `/admin/orders` | All orders, filters by status, payment status, city and search |
 | `/admin/orders/[orderNumber]` | Order details, fulfilment, payment state, history |
+| `/admin/visual-search` | Visual search index status and "Update visual index" |
 
 ## Dashboard
 
@@ -195,6 +196,14 @@ labels it "Demo/manual payment state" and no money moves.
 A cancelled order can only go `paid → refunded`. Other changes are rejected
 with `409 invalid_payment_transition`. Each change is logged in
 `payment_status_history` with the admin and an optional staff note.
+
+## Visual search index
+
+New or changed product photos are not searchable by image until the index is
+updated. The dashboard shows a "Visual search" card (ready / update needed),
+`/admin/visual-search` lists unindexed, changed and missing photos with an
+**Update visual index** button, and the product editor marks photos that
+aren't indexed yet. See [visual-search.md](visual-search.md).
 
 ## Not included
 

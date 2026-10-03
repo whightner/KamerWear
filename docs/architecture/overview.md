@@ -76,7 +76,7 @@ KamerWear API.
 | Service | Purpose |
 | --- | --- |
 | Image / object storage | Store product photos and customer-uploaded images (e.g. an S3-compatible bucket) |
-| Visual-search engine | Camera search and "find similar" from an image |
+| Visual-search engine | Implemented in-process in Task 009 with a pretrained OpenCLIP model (see [visual-search.md](visual-search.md)); a dedicated service would only be needed at much larger scale |
 | AI Fit service | Size recommendation based on the customer's Fit Profile |
 | Payment provider | Mobile Money (MTN MoMo, Orange Money) and card payments |
 | Delivery provider | Shipping quotes and parcel tracking within Cameroon |

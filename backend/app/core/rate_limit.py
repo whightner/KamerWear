@@ -49,8 +49,15 @@ class RateLimiter:
 login_failures_by_email = RateLimiter(max_attempts=5, window_seconds=15 * 60)
 login_failures_by_ip = RateLimiter(max_attempts=30, window_seconds=15 * 60)
 registrations_by_ip = RateLimiter(max_attempts=10, window_seconds=60 * 60)
+# Visual searches run a neural network: 12 per minute per client IP.
+visual_searches_by_ip = RateLimiter(max_attempts=12, window_seconds=60)
 
 
 def reset_all() -> None:
-    for limiter in (login_failures_by_email, login_failures_by_ip, registrations_by_ip):
+    for limiter in (
+        login_failures_by_email,
+        login_failures_by_ip,
+        registrations_by_ip,
+        visual_searches_by_ip,
+    ):
         limiter.reset()

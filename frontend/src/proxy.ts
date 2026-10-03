@@ -96,6 +96,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Pages and Server Actions only: skip static files and images.
-  matcher: ["/((?!_next/static|_next/image|images/|favicon.ico).*)"],
+  // Pages and Server Actions only: skip static files, images and /api route
+  // handlers (the image upload must not be buffered or cut off by the proxy).
+  matcher: ["/((?!_next/static|_next/image|images/|favicon.ico|api/).*)"],
 };

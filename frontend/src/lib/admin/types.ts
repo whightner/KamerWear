@@ -190,3 +190,37 @@ export interface Overview {
   recent_orders: AdminOrderSummary[];
   low_stock: InventoryRow[];
 }
+
+export interface VisualSearchStatus {
+  model: string;
+  encoder_state: "loaded" | "not_loaded" | "failed";
+  ready: boolean;
+  active_images: number;
+  indexed_images: number;
+  products_represented: number;
+  active_products: number;
+  stale_images: string[];
+  unindexed_images: string[];
+  missing_files: string[];
+  last_run: {
+    trigger: string;
+    status: string;
+    indexed: number;
+    unchanged: number;
+    failed: number;
+    removed: number;
+    message: string | null;
+    started_at: string;
+    finished_at: string | null;
+  } | null;
+}
+
+export interface RebuildResult {
+  model: string;
+  indexed: number;
+  unchanged: number;
+  failed: number;
+  removed: number;
+  seconds: number;
+  problems: string[];
+}

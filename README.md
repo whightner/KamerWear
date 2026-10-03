@@ -30,8 +30,9 @@ The storefront reads a real catalog from the API. Customers can create an
 account, save delivery addresses, keep a cart in their account, check out with
 a demo payment method, and follow their orders with status tracking. Store
 staff run the shop from an admin dashboard at `/admin`: products, categories,
-variants, image metadata, stock and order fulfilment. Real payments, couriers
-and the AI features are not built yet; see
+variants, image metadata, stock and order fulfilment. **Search by image**
+(`/visual-search`) finds visually similar products with a pretrained vision
+model (OpenCLIP). Real payments, couriers and Smart Fit are not built yet; see
 [Project status](#project-status).
 
 ## Architecture
@@ -143,6 +144,18 @@ users):
 python -m app.db.create_admin
 ```
 
+Optional — visual search (needs ~600 MB of model weights, downloaded once;
+see [docs/architecture/visual-search.md](docs/architecture/visual-search.md)):
+
+```bash
+pip install -r requirements-visual-search.txt
+python -m app.ai.prepare_visual_search   # download + self-test (needs internet once)
+python -m app.ai.visual_search_index     # encode the catalog photos
+```
+
+Without these steps the shop works normally and `/visual-search` explains that
+image search is unavailable.
+
 Orders are fulfilled in the admin (`/admin/orders`). The same transitions are
 also available from the command line:
 
@@ -231,6 +244,12 @@ storefront always fetches fresh data.
   deactivated rather than deleted; staff set physical stock (`on_hand`) but
   never `reserved`; orders follow a fixed state machine that adjusts stock
   exactly once. Details: [docs/architecture/admin.md](docs/architecture/admin.md).
+- Visual search: `/visual-search` sends the photo through a Next.js route
+  handler to `POST /api/v1/visual-search`. FastAPI encodes it with a
+  pretrained OpenCLIP model, compares it with the stored embeddings of the
+  catalog photos (cosine similarity) and returns ranked products. The photo is
+  not stored. Details:
+  [docs/architecture/visual-search.md](docs/architecture/visual-search.md).
 
 ## Project status
 
@@ -246,4 +265,5 @@ storefront always fetches fresh data.
 | Customer accounts: register, login, logout, profile, password change | Done (Task 006) |
 | Addresses, saved cart, checkout (demo payments), orders and status tracking | Done (Task 007) |
 | Admin dashboard: products, categories, variants, images, inventory, order fulfilment, demo payment states | Done (Task 008) |
-| Real payments, courier integration, image upload, saved favorites, returns, AI features | Not started (future tasks) |
+| Visual search by photo and visually similar products (pretrained OpenCLIP embeddings) | Done (Task 009); real-model quality check pending (weights must be downloaded first) |
+| Smart Fit, real payments, courier integration, image upload, saved favorites, returns | Not started (future tasks) |

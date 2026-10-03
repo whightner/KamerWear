@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { FormMessage, SubmitButton, TextField } from "@/components/auth/fields";
 import { deleteImageAction, saveImageAction, type AdminFormState } from "@/lib/admin/actions";
 import type { AdminImage, AdminProduct } from "@/lib/admin/types";
@@ -120,7 +121,14 @@ function RemoveImage({ image }: { image: AdminImage }) {
   );
 }
 
-export function ImageManager({ product }: { product: AdminProduct }) {
+export function ImageManager({
+  product,
+  notSearchable,
+}: {
+  product: AdminProduct;
+  /** Image paths missing from the visual search index (null: status unknown). */
+  notSearchable: string[] | null;
+}) {
   const [editing, setEditing] = useState<number | null>(null);
   // Open at first when there are no images; afterwards it stays as the admin left it.
   const [adding, setAdding] = useState(product.images.length === 0);
@@ -149,6 +157,14 @@ export function ImageManager({ product }: { product: AdminProduct }) {
                     </p>
                     <p className="break-all font-mono text-xs text-muted">{image.image_path}</p>
                     <p className="text-xs text-muted">Colour: {image.color_name ?? "all colours"}</p>
+                    {product.is_active && notSearchable?.includes(image.image_path) && (
+                      <p className="mt-1 text-xs font-medium text-deal-dark">
+                        Not in visual search yet —{" "}
+                        <Link href="/admin/visual-search" className="underline underline-offset-2">
+                          update the index
+                        </Link>
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setEditing(image.id)} aria-label={`Edit image ${image.alt_text}`} className="h-8 rounded-md border border-line px-3 text-xs font-semibold text-ink hover:bg-cream">

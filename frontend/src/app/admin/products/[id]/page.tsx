@@ -18,9 +18,10 @@ export default async function EditProductPage({ params, searchParams }: PageProp
   if (!token) return null;
   const productId = Number(id);
   if (!Number.isInteger(productId)) notFound();
-  const [product, categories] = await Promise.all([
+  const [product, categories, visual] = await Promise.all([
     adminApi.product(token, productId),
     adminApi.categories(token),
+    adminApi.visualSearchStatus(token),
   ]);
   if (!product.ok && product.status === 404) notFound();
   if (!product.ok || !categories.ok) return <AdminError what="this product" />;
@@ -81,7 +82,14 @@ export default async function EditProductPage({ params, searchParams }: PageProp
           <VariantManager product={p} />
         </Panel>
         <Panel title={`Images (${p.images.length})`}>
-          <ImageManager product={p} />
+          <ImageManager
+            product={p}
+            notSearchable={
+              visual.ok
+                ? [...visual.data.unindexed_images, ...visual.data.stale_images, ...visual.data.missing_files]
+                : null
+            }
+          />
         </Panel>
         <Panel title="Product details">
           <ProductForm product={p} categories={categories.data} />

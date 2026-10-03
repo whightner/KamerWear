@@ -41,6 +41,16 @@ class Settings(BaseSettings):
     # so rate limits apply to the real browser IP. Comma-separated.
     trusted_proxy_ips: Annotated[list[str], NoDecode] = ["127.0.0.1", "::1"]
 
+    # Visual search (pretrained OpenCLIP encoder; see docs/architecture/visual-search.md).
+    visual_search_model: str = "ViT-B-32"
+    visual_search_pretrained: str = "laion2b_s34b_b79k"
+    # Folder that contains images/products/... (the web app's public folder).
+    visual_search_image_root: Path = BACKEND_DIR.parent / "frontend" / "public"
+    # Where downloaded model weights are cached (never committed).
+    visual_search_cache_dir: Path = BACKEND_DIR / ".model-cache"
+    # true = never download; use only the cached weights (for presentations).
+    visual_search_offline: bool = False
+
     @field_validator("cors_origins", "trusted_proxy_ips", mode="before")
     @classmethod
     def split_comma_list(cls, value: str | list[str]) -> list[str]:

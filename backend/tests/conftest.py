@@ -28,8 +28,9 @@ from app.db.seed import seed_catalog
 from app.db.session import get_db
 from app.main import app
 
-# Shared fixtures for the admin tests (admin, customer, placed_order).
-pytest_plugins = ["tests.admin"]
+# Shared fixtures: admin tests (admin, customer, placed_order) and visual
+# search tests (fake_encoder, image_root, indexed).
+pytest_plugins = ["tests.admin", "tests.visual"]
 
 
 def _test_database_url():

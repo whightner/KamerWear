@@ -1,3 +1,4 @@
+import type { VisualSimilarResult } from "@/lib/visual-search/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Headphones, RotateCcw, Star, Truck } from "lucide-react";
@@ -9,6 +10,7 @@ import {
   CatalogApiError,
   getProduct,
   getSimilarProducts,
+  getVisualSimilar,
   isNotFound,
 } from "@/lib/api/catalog";
 import type {
@@ -34,14 +36,21 @@ export async function generateMetadata({
   }
 }
 
-/** Loads the product (404 → notFound) and, independently, its similar items. */
-async function loadProduct(
-  slug: string,
-): Promise<{ product: ApiProduct; similar: ProductListItem[] | null } | null> {
-  const [product, similar] = await Promise.allSettled([
+/**
+ * Loads the product (404 → notFound) and, independently, its rule-based
+ * related items and its visually similar items (image embeddings).
+ */
+async function loadProduct(slug: string): Promise<{
+  product: ApiProduct;
+  similar: ProductListItem[] | null;
+  visualSimilar: VisualSimilarResult;
+} | null> {
+  const [product, similar, visualSimilar] = await Promise.allSettled([
     getProduct(slug),
     getSimilarProducts(slug),
+    getVisualSimilar(slug),
   ]);
+  if (visualSimilar.status === "rejected") throw visualSimilar.reason;
   for (const result of [product, similar]) {
     // Only API failures are handled here; anything else is a bug.
     if (
@@ -59,6 +68,7 @@ async function loadProduct(
   return {
     product: product.value,
     similar: similar.status === "fulfilled" ? similar.value : null,
+    visualSimilar: visualSimilar.value,
   };
 }
 
@@ -95,7 +105,7 @@ export default async function ProductPage({
       </Container>
     );
   }
-  const { product, similar } = loaded;
+  const { product, similar, visualSimilar } = loaded;
   const category = product.category;
 
   return (
@@ -110,7 +120,7 @@ export default async function ProductPage({
       />
 
       <div className="mt-6">
-        <ProductDetail product={product} similar={similar} />
+        <ProductDetail product={product} related={similar} visualSimilar={visualSimilar} />
       </div>
 
       <div className="mt-14 grid gap-6 lg:grid-cols-12">

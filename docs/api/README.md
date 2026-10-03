@@ -305,6 +305,41 @@ Order statuses: `pending`, `confirmed`, `preparing`, `shipped`,
 `out_for_delivery`, `delivered`, `cancelled`. Payment statuses: `pending`,
 `paid`, `failed`, `refunded`.
 
+## Visual search
+
+Design, model, privacy and limits:
+[../architecture/visual-search.md](../architecture/visual-search.md).
+
+### `POST /api/v1/visual-search`
+
+`multipart/form-data` with one `image` file (JPEG, PNG or WebP, at most 8 MB,
+8 000 px per side, 30 megapixels). Query `limit` 1–24 (default 8). Public,
+12 requests per minute per client. The photo is not stored.
+
+```json
+{ "query": { "predicted_type": "footwear", "predicted_type_label": "Shoes",
+             "type_guard_applied": true, "weak_matches": false,
+             "model": "ViT-B-32/laion2b_s34b_b79k", "search_ms": 92 },
+  "items": [{ "product": { …product card fields… },
+              "similarity_score": 0.83,
+              "matched_image": "/images/products/urban-runner-02/black-1.webp",
+              "matches_predicted_type": true }] }
+```
+
+`similarity_score` is a cosine similarity for ranking/debugging, not a
+probability. Each product appears once (its best-matching photo).
+
+### `GET /api/v1/products/{slug}/visual-similar`
+
+Visually similar products from the product's stored photo embeddings
+(`limit` 1–12, default 4; the product itself is excluded):
+`{ "type_guard_applied", "weak_matches", "model", "items": [...] }`. This is
+separate from `/products/{slug}/similar`, which uses catalog rules.
+
+Errors: `invalid_image` 400, `image_too_large` 413, `unsupported_image_type` 415,
+`too_many_searches` 429, `no_searchable_products` 404, `product_not_indexed` 409,
+`visual_search_unavailable` / `visual_search_not_ready` 503.
+
 ## Admin API (ADMIN only)
 
 Every route below requires `Authorization: Bearer` for an **admin** account:
@@ -333,6 +368,8 @@ customers. Rules, state machines and the inventory policy:
 | `GET` | `/api/v1/admin/orders/{order_number}` | customer, items, delivery copy, `status_history` (with `internal_note`, `changed_by`), `payment_history`, `timeline`, `allowed_statuses`, `allowed_payment_statuses` |
 | `POST` | `/api/v1/admin/orders/{order_number}/status` | `{status, note?, internal_note?}`; `note` is shown to the customer |
 | `POST` | `/api/v1/admin/orders/{order_number}/payment-status` | `{payment_status, note?}` (manual/demo) |
+| `GET` | `/api/v1/admin/visual-search/status` | model, `ready`, indexed / stale / unindexed / missing photos, last index run |
+| `POST` | `/api/v1/admin/visual-search/rebuild` | encode new or changed photos (`409 index_busy` if one is running, `503 visual_search_unavailable` without the model) |
 
 Product and variant writes return the updated product detail, so the client
 always shows the server's view. Prices and stock must be JSON integers.

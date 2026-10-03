@@ -319,3 +319,25 @@ export async function changePaymentStatusAction(
   refresh();
   return { success: `Payment recorded as “${paymentStatus}” (manual, demo).`, at: Date.now() };
 }
+
+// --- Visual search index -----------------------------------------------------------
+
+export async function rebuildVisualIndexAction(): Promise<AdminFormState> {
+  const result = await adminApi.rebuildVisualSearch(await token());
+  if (!result.ok) {
+    if (result.status === 401) redirect("/login?next=%2Fadmin%2Fvisual-search&reason=expired");
+    const message =
+      result.code === "visual_search_unavailable"
+        ? "The vision model isn't available on the server. Run `python -m app.ai.prepare_visual_search` there first."
+        : result.code === "index_busy"
+          ? "An index build is already running. Try again in a moment."
+          : result.message;
+    return { error: message, at: Date.now() };
+  }
+  refresh();
+  const r = result.data;
+  return {
+    success: `Index updated in ${r.seconds}s: ${r.indexed} encoded, ${r.unchanged} unchanged, ${r.removed} removed${r.failed ? `, ${r.failed} failed` : ""}.`,
+    at: Date.now(),
+  };
+}

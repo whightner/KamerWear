@@ -23,6 +23,7 @@ from app.models.order import (
     PaymentStatus,
     PaymentStatusHistory,
 )
+from app.models.visual_search import ProductImageEmbedding, VisualSearchIndexRun
 from app.models.user import AuthSession, Role, User, UserProfile
 
 __all__ = [
@@ -42,8 +43,10 @@ __all__ = [
     "PaymentStatusHistory",
     "Product",
     "ProductImage",
+    "ProductImageEmbedding",
     "ProductVariant",
     "Role",
     "User",
     "UserProfile",
+    "VisualSearchIndexRun",
 ]

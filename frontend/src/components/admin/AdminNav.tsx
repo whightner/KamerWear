@@ -7,6 +7,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   Package,
+  ScanSearch,
   Store,
   Tags,
   type LucideIcon,
@@ -18,6 +19,7 @@ const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/inventory", label: "Inventory", icon: Boxes },
   { href: "/admin/orders", label: "Orders", icon: ClipboardList },
+  { href: "/admin/visual-search", label: "Visual search", icon: ScanSearch },
 ];
 
 export function AdminNav() {
