@@ -1,0 +1,10 @@
+# Optional: the pretrained pose model behind Smart Fit.
+# Install after requirements.txt:  pip install -r requirements-smart-fit.txt
+# Without it the shop works normally and Smart Fit photo estimates answer
+# "fit_service_unavailable" (saved Fit Profiles and manual sizes still work).
+#
+# MediaPipe (Apache-2.0) runs Google's Pose Landmarker; the model file (Apache-2.0)
+# is downloaded once by `python -m app.ai.prepare_smart_fit`.
+# Linux servers also need the EGL/GLES runtime libraries, e.g. on Debian/Ubuntu:
+#   sudo apt-get install libegl1 libgles2
+mediapipe>=1.0.1

@@ -71,7 +71,8 @@ class ProductListResponse(BaseModel):
 class ProductDetail(ProductListItem):
     description: str
     smart_fit_demo_size: str | None = Field(
-        description="Demo-only size for the Smart Fit preview (no real Fit Profiles yet)."
+        description="Legacy demo value from the catalog seed. Not used for recommendations: "
+        "see GET /products/{slug}/fit-recommendation."
     )
     images: list[ProductImageResponse]
     # Read from the model's active variants; serialized as "variants".

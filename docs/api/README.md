@@ -340,6 +340,64 @@ Errors: `invalid_image` 400, `image_too_large` 413, `unsupported_image_type` 415
 `too_many_searches` 429, `no_searchable_products` 404, `product_not_indexed` 409,
 `visual_search_unavailable` / `visual_search_not_ready` 503.
 
+## Smart Fit
+
+Method, privacy, charts and limits:
+[../architecture/smart-fit.md](../architecture/smart-fit.md). All routes
+except the size charts need `Authorization: Bearer`.
+
+### `POST /api/v1/fit/estimate`
+
+`multipart/form-data`: `front` (required) and `side` (optional) images (JPEG,
+PNG or WebP, ≤ 8 MB each), `height_cm` (100–230), `fit_preference`
+(`slim`/`regular`/`relaxed`). 10 per 10 minutes per user. Photos are not
+stored. The result is only a suggestion: it is **not** saved as the profile.
+
+```json
+{ "estimate_id": 12, "height_cm": 178, "fit_preference": "regular",
+  "used_side_photo": true,
+  "measurements": { "shoulder_width_cm": 35.0, "chest_cm": 105.2, "waist_cm": 96.7,
+                    "hip_cm": null, "inseam_cm": 79.2 },
+  "suggested": { "top": "L", "bottom": "36" },
+  "suggested_by_preference": { "slim": {…}, "regular": {…}, "relaxed": {…} },
+  "size_notes": [], "confidence": "medium",
+  "confidence_factors": ["Side photo used to measure body depth.", "…"],
+  "warnings": ["Your arms were touching your body at the hips, …"],
+  "estimation_version": "kamerwear-fit-0.1/mediapipe-pose-landmarker-heavy-float16-v1",
+  "size_chart_version": "kamerwear-demo-2026.1", "created_at": "…" }
+```
+
+`confidence` is `high`/`medium`/`low` (how well the photos supported the
+estimate), never a percentage. `null` means not estimated.
+
+Errors: `invalid_fit_image` 400, `fit_image_too_large` 413,
+`fit_pose_not_detected` / `fit_full_body_not_visible` / `fit_multiple_people` /
+`fit_photo_quality` / `invalid_fit_height` 422 (photo errors include
+`"photo": "front"|"side"`), `too_many_fit_estimates` 429,
+`fit_service_unavailable` 503.
+
+### Fit Profile
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/fit/profile` | `404 fit_profile_not_found` if none |
+| `PUT` | `/api/v1/fit/profile` | `{estimate_id?, height_cm, fit_preference, top_size?, bottom_size?, shoe_size_eu?}`; measurements are copied from the customer's own estimate, never accepted from the client; `404 fit_estimate_not_found`, `422 fit_estimate_mismatch` / `invalid_fit_size` |
+| `DELETE` | `/api/v1/fit/profile` | `204`; also deletes stored estimates, keeps the account |
+| `GET` | `/api/v1/fit/size-charts` | public; the versioned demo charts |
+
+Profile response: `height_cm`, `fit_preference`, `top_size`, `bottom_size`,
+`bottom_size_letter`, `shoe_size_eu`, `estimated_measurements`, `source`
+(`photo_estimate`/`photo_corrected`/`manual`), `confidence`,
+`estimation_version`, `confirmed_by_user`, `created_at`, `updated_at`.
+
+### `GET /api/v1/products/{slug}/fit-recommendation`
+
+`{ "status", "kind", "size", "size_label", "nearest_available", "source",
+"confidence", "message" }` with `status` `recommended`, `unavailable` (size out
+of stock; `nearest_available` in stock), `not_offered`, `missing_size`,
+`no_profile` or `unsupported` (not a Smart Fit product, or one-size). It never
+selects a variant or changes the cart.
+
 ## Admin API (ADMIN only)
 
 Every route below requires `Authorization: Bearer` for an **admin** account:

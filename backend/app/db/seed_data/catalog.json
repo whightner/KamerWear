@@ -153,6 +153,7 @@
       "XXL"
     ],
     "stock": 40,
+    "smartFit": true,
     "tags": [
       "tee",
       "top",
@@ -296,6 +297,7 @@
       "36"
     ],
     "stock": 4,
+    "smartFit": true,
     "tags": [
       "streetwear",
       "pants",
@@ -629,6 +631,7 @@
     ],
     "stock": 35,
     "isNew": true,
+    "smartFit": true,
     "tags": [
       "pants",
       "sweatpants",

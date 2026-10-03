@@ -17,6 +17,8 @@ import type {
   ProductDetail as ApiProduct,
   ProductListItem,
 } from "@/lib/api/types";
+import { getProductFit } from "@/lib/fit/api";
+import type { ProductFitState } from "@/lib/fit/types";
 import { isShoe } from "@/lib/products";
 
 // Product data is fetched from the catalog API on every request (no static params).
@@ -107,6 +109,10 @@ export default async function ProductPage({
   }
   const { product, similar, visualSimilar } = loaded;
   const category = product.category;
+  // Only Smart Fit products ask for a recommendation; failures never break the page.
+  const fit: ProductFitState = product.smart_fit
+    ? await getProductFit(product.slug)
+    : { status: "unsupported" };
 
   return (
     <Container className="pb-16 pt-6">
@@ -120,7 +126,12 @@ export default async function ProductPage({
       />
 
       <div className="mt-6">
-        <ProductDetail product={product} related={similar} visualSimilar={visualSimilar} />
+        <ProductDetail
+          product={product}
+          related={similar}
+          visualSimilar={visualSimilar}
+          fit={fit}
+        />
       </div>
 
       <div className="mt-14 grid gap-6 lg:grid-cols-12">

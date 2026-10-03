@@ -1,6 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Ruler } from "lucide-react";
-import { ComingSoonButton } from "./ComingSoonButton";
 import { Container } from "./Container";
 
 const steps = [
@@ -37,7 +37,7 @@ export function SmartFitBanner() {
             />
             <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/95 p-4 shadow-[0_10px_30px_rgba(27,26,25,0.15)] sm:right-auto sm:w-64">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted">
-                Your estimate
+                Your Fit Profile
               </p>
               <div className="mt-2 flex items-end justify-between">
                 <div>
@@ -50,16 +50,13 @@ export function SmartFitBanner() {
                 </div>
                 <div>
                   <p className="text-xs text-muted">Shoes</p>
-                  <p className="text-xl font-extrabold text-ink">43</p>
+                  <p className="text-xl font-extrabold text-ink">EU 43</p>
                 </div>
               </div>
               <div className="mt-3">
                 <div className="flex justify-between text-[11px] font-semibold">
                   <span className="text-fit">Confidence: high</span>
                   <span className="text-muted">Example</span>
-                </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-fit/15">
-                  <div className="h-full w-4/5 rounded-full bg-fit" />
                 </div>
               </div>
             </div>
@@ -101,14 +98,13 @@ export function SmartFitBanner() {
             </ol>
 
             <div className="mt-8">
-              <ComingSoonButton
+              <Link
+                href="/fit"
                 className="inline-flex h-12 items-center gap-2 rounded-lg bg-fit px-6 text-sm font-semibold text-white hover:bg-fit-dark"
-                message="Fit Profiles are coming soon to KamerWear."
-                messageClassName="text-fit-dark"
               >
                 <Ruler className="size-4" aria-hidden="true" />
                 Create My Fit Profile
-              </ComingSoonButton>
+              </Link>
             </div>
           </div>
         </div>

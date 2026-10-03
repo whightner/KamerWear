@@ -32,7 +32,10 @@ a demo payment method, and follow their orders with status tracking. Store
 staff run the shop from an admin dashboard at `/admin`: products, categories,
 variants, image metadata, stock and order fulfilment. **Search by image**
 (`/visual-search`) finds visually similar products with a pretrained vision
-model (OpenCLIP). Real payments, couriers and Smart Fit are not built yet; see
+model (OpenCLIP). **Smart Fit** (`/fit`) suggests clothing sizes from the
+customer's height and guided photos with a pretrained pose model (MediaPipe);
+the customer confirms the sizes, which then appear on product pages. Real
+payments and couriers are not built yet; see
 [Project status](#project-status).
 
 ## Architecture
@@ -156,6 +159,19 @@ python -m app.ai.visual_search_index     # encode the catalog photos
 Without these steps the shop works normally and `/visual-search` explains that
 image search is unavailable.
 
+Optional — Smart Fit photo sizing (a ~30 MB pose model, downloaded once; on
+Linux also `sudo apt-get install libegl1 libgles2`; see
+[docs/architecture/smart-fit.md](docs/architecture/smart-fit.md)):
+
+```bash
+pip install -r requirements-smart-fit.txt
+python -m app.ai.prepare_smart_fit            # download + SHA-256 check + self-test
+python -m app.ai.prepare_smart_fit --offline  # before a demo: verify without network
+```
+
+Without it, photo estimates answer "unavailable" and customers can still enter
+their sizes manually.
+
 Orders are fulfilled in the admin (`/admin/orders`). The same transitions are
 also available from the command line:
 
@@ -250,6 +266,13 @@ storefront always fetches fresh data.
   catalog photos (cosine similarity) and returns ranked products. The photo is
   not stored. Details:
   [docs/architecture/visual-search.md](docs/architecture/visual-search.md).
+- Smart Fit: `/fit` sends the photos through the `/api/fit/estimate` route
+  handler to `POST /api/v1/fit/estimate`. FastAPI finds body landmarks and the
+  body outline with MediaPipe Pose Landmarker, scales them by the typed height
+  and suggests sizes from versioned demo size charts. Photos are discarded;
+  nothing is saved until the customer confirms (`PUT /api/v1/fit/profile`).
+  Shoe sizes are entered, never estimated. Details:
+  [docs/architecture/smart-fit.md](docs/architecture/smart-fit.md).
 
 ## Project status
 
@@ -266,4 +289,5 @@ storefront always fetches fresh data.
 | Addresses, saved cart, checkout (demo payments), orders and status tracking | Done (Task 007) |
 | Admin dashboard: products, categories, variants, images, inventory, order fulfilment, demo payment states | Done (Task 008) |
 | Visual search by photo and visually similar products (pretrained OpenCLIP embeddings) | Done (Task 009); real-model quality check pending (weights must be downloaded first) |
-| Smart Fit, real payments, courier integration, image upload, saved favorites, returns | Not started (future tasks) |
+| Smart Fit: height + guided photos → estimated sizes → customer confirms → Fit Profile and product recommendations (pretrained MediaPipe pose model) | Done (Task 010); real-world accuracy not yet validated against tape measurements |
+| Real payments, courier integration, image upload, saved favorites, returns | Not started (future tasks) |

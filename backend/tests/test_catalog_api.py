@@ -109,7 +109,7 @@ def test_price_filter(client):
 
 def test_smart_fit_filter(client):
     items = get_items(client, smart_fit="true")
-    assert len(items) == 9 and all(i["smart_fit"] for i in items)
+    assert len(items) == 12 and all(i["smart_fit"] for i in items)
 
 
 def test_on_sale_filter(client):

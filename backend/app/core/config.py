@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     # true = never download; use only the cached weights (for presentations).
     visual_search_offline: bool = False
 
+    # Smart Fit (pretrained MediaPipe pose model; see docs/architecture/smart-fit.md).
+    # Downloaded once by `python -m app.ai.prepare_smart_fit`; never committed.
+    smart_fit_model_path: Path = (
+        BACKEND_DIR / ".model-cache" / "smart-fit" / "pose_landmarker_heavy.task"
+    )
+
     @field_validator("cors_origins", "trusted_proxy_ips", mode="before")
     @classmethod
     def split_comma_list(cls, value: str | list[str]) -> list[str]:

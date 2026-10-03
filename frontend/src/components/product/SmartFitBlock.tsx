@@ -1,85 +1,135 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Ruler } from "lucide-react";
+import type { ProductFitState } from "@/lib/fit/types";
 
 interface SmartFitBlockProps {
-  isShoe: boolean;
-  demoSize?: string;
-  /** Selecting the recommended size is only offered when it is available. */
-  canSelect: boolean;
+  fit: ProductFitState;
+  /** Size currently selected in the size picker. */
+  selectedSize?: string;
+  /** Whether this size can be selected (exists and is in stock for the colour). */
+  canSelect: (size: string) => boolean;
+  /** Only selects the size: never adds to the cart. */
   onSelectSize: (size: string) => void;
+  productPath: string;
 }
 
-// No Fit Profile exists yet, so this shows the "create a profile" state and
-// an optional, clearly labelled demo recommendation.
+const KIND_LABEL = { top: "size", bottom: "trouser size", shoe: "shoe size" } as const;
+
+/**
+ * The customer's recommended size from their confirmed Fit Profile. Hidden for
+ * products Smart Fit doesn't support. A Smart Fit problem never blocks buying.
+ */
 export function SmartFitBlock({
-  isShoe,
-  demoSize,
+  fit,
+  selectedSize,
   canSelect,
   onSelectSize,
+  productPath,
 }: SmartFitBlockProps) {
-  const [showDemo, setShowDemo] = useState(false);
-  const sizeLabel = isShoe ? `EU ${demoSize}` : demoSize;
+  if (fit.status === "unsupported") return null;
 
-  return (
-    <section
-      aria-labelledby="smart-fit-heading"
-      className="rounded-xl border border-fit/25 bg-fit-soft p-4"
-    >
-      <h2
-        id="smart-fit-heading"
-        className="flex items-center gap-1.5 text-sm font-bold text-fit-dark"
-      >
-        <Ruler className="size-4" aria-hidden="true" />
-        Smart Fit recommendation
-      </h2>
-
-      {showDemo && demoSize ? (
-        <div className="mt-2">
-          <p className="text-sm text-ink">
-            {isShoe ? "Recommended shoe size" : "Recommended size"}:{" "}
-            <strong>{sizeLabel}</strong>
-          </p>
-          <p className="mt-0.5 text-xs text-muted">
-            Estimated from a demo Fit Profile, not your measurements. Confirm
-            before buying.
-          </p>
-          {canSelect && (
+  let body: React.ReactNode;
+  if (fit.status === "signed_out") {
+    body = (
+      <>
+        <p className="text-sm text-ink">Log in to see the size recommended for you.</p>
+        <Links
+          primary={{ href: `/login?next=${encodeURIComponent(productPath)}`, label: "Log in" }}
+        />
+      </>
+    );
+  } else if (fit.status === "error") {
+    body = (
+      <p className="text-sm text-ink">
+        Your recommendation isn&apos;t available right now. You can still choose a size below.
+      </p>
+    );
+  } else if (fit.status === "no_profile") {
+    body = (
+      <>
+        <p className="text-sm text-ink">Create your Fit Profile to see your recommended size.</p>
+        <Links primary={{ href: "/fit", label: "Create My Fit Profile" }} />
+      </>
+    );
+  } else if (fit.status === "missing_size") {
+    body = (
+      <>
+        <p className="text-sm text-ink">{fit.message}</p>
+        <Links primary={{ href: "/account/fit-profile", label: "Update my Fit Profile" }} />
+      </>
+    );
+  } else {
+    const label = fit.size_label ?? fit.size ?? "";
+    const nearest = fit.nearest_available;
+    const nearestLabel = nearest && fit.kind === "shoe" ? `EU ${nearest}` : nearest;
+    const isSelected = selectedSize === fit.size;
+    body = (
+      <>
+        <p className="text-sm text-ink">
+          {fit.kind ? `Recommended ${KIND_LABEL[fit.kind]} for you` : "Recommended for you"}:{" "}
+          <strong className="text-base">{label}</strong>
+        </p>
+        {fit.status !== "recommended" && fit.message && (
+          <p className="mt-1 text-sm font-medium text-deal-dark">{fit.message}</p>
+        )}
+        <p className="mt-0.5 text-xs text-muted">
+          From the {fit.kind === "shoe" ? "shoe size you entered" : "sizes you confirmed"} in your
+          Fit Profile.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
+          {fit.status === "recommended" && fit.size && canSelect(fit.size) && (
             <button
               type="button"
-              onClick={() => onSelectSize(demoSize)}
-              className="mt-2 text-xs font-semibold text-fit-dark underline underline-offset-2"
+              onClick={() => onSelectSize(fit.size!)}
+              aria-pressed={isSelected}
+              disabled={isSelected}
+              className="text-fit-dark underline underline-offset-2 disabled:no-underline disabled:opacity-80"
             >
-              Select {sizeLabel}
+              {isSelected ? `${label} selected` : `Select recommended size ${label}`}
             </button>
           )}
-        </div>
-      ) : (
-        <div className="mt-1.5">
-          <p className="text-sm text-ink">
-            Create a Fit Profile to get a personal recommendation.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
-            <Link
-              href="/#smart-fit"
+          {fit.status !== "recommended" && nearest && canSelect(nearest) && (
+            <button
+              type="button"
+              onClick={() => onSelectSize(nearest)}
+              aria-pressed={selectedSize === nearest}
               className="text-fit-dark underline underline-offset-2"
             >
-              How Smart Fit works
-            </Link>
-            {demoSize && (
-              <button
-                type="button"
-                onClick={() => setShowDemo(true)}
-                className="text-fit-dark underline underline-offset-2"
-              >
-                Preview a demo recommendation
-              </button>
-            )}
-          </div>
+              Select {nearestLabel} instead
+            </button>
+          )}
+          <Link href="/account/fit-profile" className="text-fit-dark underline underline-offset-2">
+            My Fit Profile
+          </Link>
         </div>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <section aria-labelledby="smart-fit-heading" className="rounded-xl border border-fit/25 bg-fit-soft p-4">
+      <h2 id="smart-fit-heading" className="flex items-center gap-1.5 text-sm font-bold text-fit-dark">
+        <Ruler className="size-4" aria-hidden="true" />
+        Smart Fit
+      </h2>
+      <div className="mt-1.5">{body}</div>
     </section>
+  );
+}
+
+function Links({ primary }: { primary: { href: string; label: string } }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
+      <Link href={primary.href} className="text-fit-dark underline underline-offset-2">
+        {primary.label}
+      </Link>
+      {primary.href !== "/fit" && (
+        <Link href="/fit" className="text-fit-dark underline underline-offset-2">
+          How Smart Fit works
+        </Link>
+      )}
+    </div>
   );
 }

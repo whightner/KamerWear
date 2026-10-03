@@ -9,6 +9,7 @@ from app.api.v1.endpoints import (
     cart,
     categories,
     checkout,
+    fit,
     health,
     orders,
     products,
@@ -30,3 +31,4 @@ api_router.include_router(admin_store.router)
 api_router.include_router(admin_catalog.router)
 api_router.include_router(visual_search.router)
 api_router.include_router(admin_visual_search.router)
+api_router.include_router(fit.router)

@@ -40,9 +40,9 @@ export default async function AccountPage() {
     },
     {
       title: "Fit Profile",
-      description: "Your measurements for Smart Fit size recommendations.",
+      description: "Your confirmed sizes for Smart Fit recommendations.",
       icon: Ruler,
-      badge: "Coming soon",
+      href: "/account/fit-profile",
     },
     {
       title: "Addresses",

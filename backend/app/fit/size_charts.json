@@ -1,0 +1,36 @@
+{
+  "version": "kamerwear-demo-2026.1",
+  "note": "Generic demo size charts for the KamerWear school MVP. They follow common unisex ready-to-wear ranges and are not any brand's official chart. Body measurements in centimetres; a size covers [min, max).",
+  "tops": {
+    "measurement": "chest_cm",
+    "sizes": [
+      {"size": "XS", "chest_cm": [80, 88]},
+      {"size": "S", "chest_cm": [88, 96]},
+      {"size": "M", "chest_cm": [96, 104]},
+      {"size": "L", "chest_cm": [104, 112]},
+      {"size": "XL", "chest_cm": [112, 120]},
+      {"size": "XXL", "chest_cm": [120, 128]}
+    ]
+  },
+  "bottoms": {
+    "measurement": "waist_cm and hip_cm (the larger size wins)",
+    "sizes": [
+      {"size": "28", "letter": "XS", "waist_cm": [70, 75], "hip_cm": [86, 91]},
+      {"size": "30", "letter": "S", "waist_cm": [75, 80], "hip_cm": [91, 96]},
+      {"size": "32", "letter": "M", "waist_cm": [80, 86], "hip_cm": [96, 101]},
+      {"size": "34", "letter": "L", "waist_cm": [86, 92], "hip_cm": [101, 106]},
+      {"size": "36", "letter": "XL", "waist_cm": [92, 98], "hip_cm": [106, 111]},
+      {"size": "38", "letter": "XXL", "waist_cm": [98, 104], "hip_cm": [111, 116]},
+      {"size": "40", "letter": "XXL", "waist_cm": [104, 110], "hip_cm": [116, 121]}
+    ]
+  },
+  "shoes": {
+    "measurement": "entered by the customer (never estimated from photos)",
+    "eu_min": 35,
+    "eu_max": 48
+  },
+  "fit_preference": {
+    "boundary_fraction": 0.25,
+    "note": "Slim moves one size down when the measurement is in the lowest quarter of its size range; Relaxed moves one size up when it is in the highest quarter. Regular keeps the best match."
+  }
+}

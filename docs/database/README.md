@@ -96,6 +96,16 @@ No pgvector: the ~70 vectors are compared with NumPy (see
 [../architecture/visual-search.md](../architecture/visual-search.md)).
 Uploaded search photos are never stored.
 
+## Smart Fit schema
+
+| Table | Purpose | Notes |
+| --- | --- | --- |
+| `fit_profiles` | The customer's confirmed sizes (one per user, cascade delete) | `height_cm`, `fit_preference` (slim/regular/relaxed), `top_size`, `bottom_size`, `shoe_size_eu` (entered by the customer), `estimated_*_cm` (NUMERIC(5,1), null when not estimated or manual), `source`, `confidence`, `estimation_version`, `confirmed_by_user`, timestamps |
+| `fit_estimates` | Recent photo estimates awaiting confirmation (last 3 per user) | derived numbers only: height, preference, `used_side_photo`, estimated dimensions, suggested sizes, `confidence`, `warnings` (JSON), `estimation_version` |
+
+No table stores photos, landmarks or masks. Deleting the Fit Profile deletes
+the user's estimates too.
+
 ## Seed data
 
 ```bash

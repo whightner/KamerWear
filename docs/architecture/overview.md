@@ -77,7 +77,7 @@ KamerWear API.
 | --- | --- |
 | Image / object storage | Store product photos and customer-uploaded images (e.g. an S3-compatible bucket) |
 | Visual-search engine | Implemented in-process in Task 009 with a pretrained OpenCLIP model (see [visual-search.md](visual-search.md)); a dedicated service would only be needed at much larger scale |
-| AI Fit service | Size recommendation based on the customer's Fit Profile |
+| AI Fit service | Implemented in-process in Task 010 with a pretrained MediaPipe pose model (see [smart-fit.md](smart-fit.md)) |
 | Payment provider | Mobile Money (MTN MoMo, Orange Money) and card payments |
 | Delivery provider | Shipping quotes and parcel tracking within Cameroon |
 
@@ -89,7 +89,7 @@ KamerWear API.
         ↓              ↓         ↓          ↓              ↓
    PostgreSQL    Object storage  Visual   AI Fit     Payment / delivery
                                  search   service    providers
-                     (future)   (future)  (future)      (future)
+                     (future)  (in-process) (in-process) (future)
 ```
 
 ## Deliberately out of scope

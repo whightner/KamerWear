@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ScanSearch, ShoppingBag, Star, Zap } from "lucide-react";
+import type { ProductFitState } from "@/lib/fit/types";
 import type { VisualSimilarResult } from "@/lib/visual-search/types";
 import type {
   ProductDetail as ApiProduct,
@@ -35,6 +36,8 @@ interface ProductDetailProps {
   related: ProductListItem[] | null;
   /** Visually similar items from image embeddings (GET /products/{slug}/visual-similar). */
   visualSimilar: VisualSimilarResult;
+  /** Smart Fit recommendation from the customer's Fit Profile (unsupported = hidden). */
+  fit: ProductFitState;
 }
 
 /** Photos for a colour, falling back to colour-neutral photos, then all photos. */
@@ -45,7 +48,7 @@ function galleryFor(images: ProductImage[], colorName: string): ProductImage[] {
   return general.length ? general : images;
 }
 
-export function ProductDetail({ product, related, visualSimilar }: ProductDetailProps) {
+export function ProductDetail({ product, related, visualSimilar, fit }: ProductDetailProps) {
   const router = useRouter();
   const { addToCart, cartPending } = useStore();
   const [colorName, setColorName] = useState(product.colors[0]?.name ?? "");
@@ -236,13 +239,11 @@ export function ProductDetail({ product, related, visualSimilar }: ProductDetail
           <div className="mt-6 space-y-5">
             {product.smart_fit && (
               <SmartFitBlock
-                isShoe={isShoe}
-                demoSize={product.smart_fit_demo_size ?? undefined}
-                canSelect={
-                  !!product.smart_fit_demo_size &&
-                  !!variantFor(product.smart_fit_demo_size)?.in_stock
-                }
+                fit={fit}
+                selectedSize={size}
+                canSelect={(value) => !!variantFor(value)?.in_stock}
                 onSelectSize={selectSize}
+                productPath={productHref(product)}
               />
             )}
 

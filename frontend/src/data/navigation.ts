@@ -42,7 +42,7 @@ export const footerNavigation: { title: string; links: NavLink[] }[] = [
       { label: "Orders", href: "/orders" },
       { label: "Track order", href: "/orders/track" },
       { label: "Favorites", href: "/favorites" },
-      { label: "Fit Profile", href: "/#smart-fit" },
+      { label: "Fit Profile", href: "/account/fit-profile" },
     ],
   },
 ];

@@ -1,4 +1,4 @@
-"""A small in-memory sliding-window rate limiter for login and registration.
+"""A small in-memory sliding-window rate limiter (login, registration, AI features).
 
 Demo-grade only: counts live in this process, so they reset on restart and are
 not shared between workers. A production deployment should rate-limit at the
@@ -51,6 +51,8 @@ login_failures_by_ip = RateLimiter(max_attempts=30, window_seconds=15 * 60)
 registrations_by_ip = RateLimiter(max_attempts=10, window_seconds=60 * 60)
 # Visual searches run a neural network: 12 per minute per client IP.
 visual_searches_by_ip = RateLimiter(max_attempts=12, window_seconds=60)
+# Smart Fit photo estimates run a pose model on up to two photos: 10 per 10 minutes per user.
+fit_estimates_by_user = RateLimiter(max_attempts=10, window_seconds=10 * 60)
 
 
 def reset_all() -> None:
@@ -59,5 +61,6 @@ def reset_all() -> None:
         login_failures_by_ip,
         registrations_by_ip,
         visual_searches_by_ip,
+        fit_estimates_by_user,
     ):
         limiter.reset()

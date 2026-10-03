@@ -14,6 +14,7 @@ from app.models.catalog import (
     ProductImage,
     ProductVariant,
 )
+from app.models.fit import FitEstimate, FitPreference, FitProfile
 from app.models.order import (
     Order,
     OrderItem,
@@ -33,6 +34,9 @@ __all__ = [
     "CartItem",
     "Category",
     "Gender",
+    "FitEstimate",
+    "FitPreference",
+    "FitProfile",
     "Inventory",
     "Order",
     "OrderItem",
