@@ -1,0 +1,16 @@
+# Web framework and server
+fastapi>=0.115
+uvicorn[standard]>=0.30
+
+# Settings and validation
+pydantic>=2.7,<3
+pydantic-settings>=2.7,<3
+
+# Database
+sqlalchemy>=2.0,<3
+psycopg[binary]>=3.2,<4
+alembic>=1.16,<2
+
+# Testing
+pytest>=8
+httpx2>=2.0  # used by FastAPI's TestClient
