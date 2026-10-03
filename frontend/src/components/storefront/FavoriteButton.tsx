@@ -17,10 +17,10 @@ export function FavoriteButton({ productName }: { productName: string }) {
           : `Add ${productName} to favorites`
       }
       onClick={() => setFavorite((value) => !value)}
-      className="flex size-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition hover:scale-105"
+      className="flex size-8 items-center justify-center rounded-full bg-white text-ink shadow-sm ring-1 ring-black/5 transition hover:scale-105"
     >
       <Heart
-        className={`size-[18px] ${favorite ? "fill-deal text-deal" : ""}`}
+        className={`size-4 ${favorite ? "fill-deal text-deal" : ""}`}
         aria-hidden="true"
       />
     </button>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Camera,
+  ChevronDown,
   Flame,
   Heart,
   MapPin,
   Menu,
+  Package,
   Search,
   ShoppingBag,
   User,
@@ -16,10 +19,12 @@ import { mainNavigation } from "@/data/navigation";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 
+// "/orders/track" is a future route; the other pages arrive in later tasks.
 const accountLinks = [
-  { label: "Account", icon: User },
-  { label: "Favorites", icon: Heart },
-  { label: "Cart", icon: ShoppingBag },
+  { label: "Track order", href: "/orders/track", icon: Package },
+  { label: "Account", href: "#", icon: User },
+  { label: "Favorites", href: "#", icon: Heart },
+  { label: "Cart", href: "#", icon: ShoppingBag },
 ];
 
 export function Header() {
@@ -86,10 +91,12 @@ export function Header() {
             aria-label="Account"
             className="ml-auto flex items-center sm:gap-1"
           >
-            {accountLinks.map(({ label, icon: Icon }) => (
-              <a
+            {accountLinks.map(({ label, href, icon: Icon }) => (
+              <Link
                 key={label}
-                href="#"
+                href={href}
+                // Target pages don't exist yet; don't prefetch them.
+                prefetch={false}
                 aria-label={label}
                 className="flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-medium text-ink hover:bg-cream sm:px-3"
               >
@@ -97,7 +104,7 @@ export function Header() {
                 <span aria-hidden="true" className="hidden lg:inline">
                   {label}
                 </span>
-              </a>
+              </Link>
             ))}
           </nav>
         </Container>
@@ -127,11 +134,18 @@ export function Header() {
                 </a>
               ))}
             </nav>
-            <p className="hidden items-center gap-1.5 text-xs text-muted lg:flex">
-              <MapPin className="size-3.5" aria-hidden="true" />
-              Delivering to{" "}
+            {/* Demo destination. The city picker comes with the address task. */}
+            <button
+              type="button"
+              title="Choose delivery city (coming soon)"
+              aria-label="Delivery city: Douala. Choose delivery city, coming soon"
+              className="hidden items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted hover:border-ink/40 hover:bg-cream lg:flex"
+            >
+              <MapPin className="size-3.5 text-deal" aria-hidden="true" />
+              Deliver to
               <span className="font-semibold text-ink">Douala</span>
-            </p>
+              <ChevronDown className="size-3.5 text-ink" aria-hidden="true" />
+            </button>
           </Container>
         </div>
       </header>

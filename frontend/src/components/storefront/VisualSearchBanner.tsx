@@ -1,6 +1,8 @@
 import Image from "next/image";
 import {
+  ArrowDown,
   Camera,
+  Footprints,
   Globe,
   ImageIcon,
   ScanSearch,
@@ -20,11 +22,21 @@ const sources: { label: string; icon: LucideIcon }[] = [
   { label: "In real life", icon: Store },
 ];
 
-const similarItems = products.filter((p) =>
-  ["urban-runner-02", "flex-knit-runner", "city-bomber-jacket"].includes(
-    p.slug,
-  ),
-);
+// The scanned object is a sneaker, so every match shown is footwear.
+const similarShoes = products
+  .filter((p) => p.department === "Shoes")
+  .slice(0, 2);
+
+function FlowStep({ number, label }: { number: number; label: string }) {
+  return (
+    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted">
+      <span className="flex size-5 items-center justify-center rounded-full bg-cream text-[11px] text-ink">
+        {number}
+      </span>
+      {label}
+    </p>
+  );
+}
 
 export function VisualSearchBanner() {
   return (
@@ -75,10 +87,11 @@ export function VisualSearchBanner() {
             </div>
           </div>
 
-          {/* Illustration of the planned flow, built from local demo products. */}
+          {/* Illustration of the planned flow: photo of a shoe → visual search → similar shoes. */}
           <div aria-hidden="true" className="mx-auto w-full max-w-md">
             <div className="rounded-2xl bg-white p-4 text-ink">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f6f6f6]">
+              <FlowStep number={1} label="Photo of a shoe" />
+              <div className="relative mt-2 aspect-[16/10] overflow-hidden rounded-xl bg-[#f2f2f2]">
                 <Image
                   src="/images/categories/sneakers.webp"
                   alt=""
@@ -86,21 +99,26 @@ export function VisualSearchBanner() {
                   sizes="420px"
                   className="object-cover"
                 />
-                <span className="absolute left-[22%] top-[24%] h-[52%] w-[56%] rounded-lg border-2 border-dashed border-deal" />
-                <span className="absolute left-3 top-3 rounded-md bg-ink px-2 py-1 text-[11px] font-semibold text-white">
-                  Your photo
-                </span>
+                <span className="absolute left-[18%] top-[12%] h-[76%] w-[64%] rounded-lg border-2 border-dashed border-deal" />
               </div>
-              <p className="mt-4 text-xs font-bold uppercase tracking-wider text-muted">
-                Similar items
-              </p>
+
+              <div className="my-3 flex items-center gap-3">
+                <span className="h-px flex-1 bg-line" />
+                <span className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-[11px] font-semibold text-white">
+                  <ScanSearch className="size-3.5" />2 · Visual search
+                  <ArrowDown className="size-3.5" />
+                </span>
+                <span className="h-px flex-1 bg-line" />
+              </div>
+
+              <FlowStep number={3} label="Similar shoes" />
               <ul className="mt-2 grid grid-cols-3 gap-2">
-                {similarItems.map((item) => (
+                {similarShoes.map((item) => (
                   <li
                     key={item.id}
                     className="overflow-hidden rounded-lg border border-line"
                   >
-                    <div className="relative aspect-square bg-[#f3f3f1]">
+                    <div className="relative aspect-square bg-[#f2f2f2]">
                       <Image
                         src={item.image}
                         alt=""
@@ -117,6 +135,15 @@ export function VisualSearchBanner() {
                     </p>
                   </li>
                 ))}
+                <li className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-line bg-cream/60 p-2 text-center">
+                  <Footprints className="size-5 text-muted" />
+                  <span className="text-[11px] font-semibold">
+                    More sneakers
+                  </span>
+                  <span className="text-[10px] text-muted">
+                    Sorted by similarity
+                  </span>
+                </li>
               </ul>
             </div>
           </div>

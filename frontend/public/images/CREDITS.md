@@ -2,6 +2,7 @@
 
 Demo imagery for the storefront. All files were resized and converted to WebP;
 sneaker photos were cropped and small third-party logos were retouched out.
+Product photos share one 4:5 frame (800×1000) and a neutral #f2f2f2 background.
 None of these images show real KamerWear products.
 
 | Folder / files | Source | License |

@@ -37,7 +37,8 @@ export const footerNavigation: { title: string; links: NavLink[] }[] = [
     title: "Account",
     links: [
       { label: "Profile", href: "#" },
-      { label: "Orders", href: "#" },
+      { label: "Orders", href: "/orders" },
+      { label: "Track order", href: "/orders/track" },
       { label: "Favorites", href: "#" },
       { label: "Fit Profile", href: "#smart-fit" },
     ],
