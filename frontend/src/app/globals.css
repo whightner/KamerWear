@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* KamerWear design tokens. Use them as Tailwind classes, e.g. bg-cream, text-deal. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-cream: #f7f3ec;
+  --color-sand: #ece3d5;
+  --color-ink: #1b1a19;
+  --color-muted: #6b645c;
+  --color-line: #e6dfd4;
+  --color-deal: #e0482a;
+  --color-deal-dark: #b83519;
+  --color-deal-soft: #fdece7;
+  --color-gold: #f2b233;
+  --color-gold-soft: #fdf4dc;
+  --color-fit: #1d7a4c;
+  --color-fit-dark: #145a37;
+  --color-fit-soft: #e5f2ea;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Keep in-page anchor targets clear of the sticky header. */
+section[id] {
+  scroll-margin-top: 8rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
