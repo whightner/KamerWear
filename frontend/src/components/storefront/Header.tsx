@@ -57,6 +57,7 @@ function HeaderLink({ label, href, icon: Icon, count, ariaLabel }: HeaderLinkPro
 export interface HeaderAccount {
   firstName: string;
   isAdmin: boolean;
+  supportUnread: number;
 }
 
 export function Header({ account }: { account: HeaderAccount | null }) {
@@ -127,7 +128,11 @@ export function Header({ account }: { account: HeaderAccount | null }) {
           >
             <HeaderLink label="Track order" href="/orders/track" icon={Package} />
             {account ? (
-              <AccountMenu firstName={account.firstName} isAdmin={account.isAdmin} />
+              <AccountMenu
+                firstName={account.firstName}
+                isAdmin={account.isAdmin}
+                supportUnread={account.supportUnread}
+              />
             ) : (
               <HeaderLink label="Account" href="/login" icon={User} ariaLabel="Account, log in" />
             )}

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { requireAdmin } from "@/lib/auth/session";
+import { returnsApi } from "@/lib/after-sales/api";
+import { getAccessToken, requireAdmin } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Admin — KamerWear",
@@ -35,5 +36,13 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
       </div>
     );
   }
-  return <AdminShell user={admin}>{children}</AdminShell>;
+  const attention = await returnsApi.attention((await getAccessToken()) ?? "");
+  const counts = attention.ok
+    ? { returns: attention.data.returns_to_process, support: attention.data.conversations_unread }
+    : undefined;
+  return (
+    <AdminShell user={admin} counts={counts}>
+      {children}
+    </AdminShell>
+  );
 }

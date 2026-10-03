@@ -79,7 +79,8 @@ KamerWear API.
 | Visual-search engine | Implemented in-process in Task 009 with a pretrained OpenCLIP model (see [visual-search.md](visual-search.md)); a dedicated service would only be needed at much larger scale |
 | AI Fit service | Implemented in-process in Task 010 with a pretrained MediaPipe pose model (see [smart-fit.md](smart-fit.md)) |
 | Payment provider | Mobile Money (MTN MoMo, Orange Money) and card payments |
-| Delivery provider | Shipping quotes and parcel tracking within Cameroon |
+| Delivery provider | Shipping quotes and parcel tracking within Cameroon (and courier return pickup) |
+| Notifications (email/SMS/push) | Tell customers about support replies and return updates; today they see them in their account (support pages poll while open, see [returns-support.md](returns-support.md)) |
 
 ```
                       ┌──────────────────────┐

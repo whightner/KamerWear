@@ -30,7 +30,7 @@ from app.main import app
 
 # Shared fixtures: admin tests (admin, customer, placed_order) and visual
 # search tests (fake_encoder, image_root, indexed), Smart Fit tests (fake_pose).
-pytest_plugins = ["tests.admin", "tests.visual", "tests.fit"]
+pytest_plugins = ["tests.admin", "tests.visual", "tests.fit", "tests.after_sales"]
 
 
 def _test_database_url():

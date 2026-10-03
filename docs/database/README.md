@@ -106,6 +106,19 @@ Uploaded search photos are never stored.
 No table stores photos, landmarks or masks. Deleting the Fit Profile deletes
 the user's estimates too.
 
+## Returns and support schema
+
+| Table | Purpose | Notes |
+| --- | --- | --- |
+| `return_requests` | One return request | `return_number` (unique, e.g. KR-2026-8M4PQ2), `user_id`, `order_id` (cascade), `status` (requested/approved/rejected/received/refunded/cancelled, indexed), `reason_summary`, `customer_note`, `return_value` (integer XAF, purchase-time prices, no delivery fee), `refunded_amount` (demo record), `created_at`, `updated_at`, `resolved_at` |
+| `return_items` | Returned lines | `order_item_id` (the immutable order snapshot: name, SKU, size, price), `quantity > 0`, `reason`, `condition_note`, `restock` (staff decision when received); unique per request and order line |
+| `return_status_history` | Audit trail | `status`, `actor_user_id`, `customer_note` (shown to the customer), `internal_note` (staff only), `created_at` |
+| `support_conversations` | Customer ↔ store threads | `conversation_number` (KS-…), `user_id`, optional `order_id` / `return_request_id` (set null if removed), `subject`, `status` (open/closed), `last_message_at` (indexed, for sorting), `closed_at` |
+| `support_messages` | Plain-text messages | `conversation_id`, `sender_user_id`, `sender_role` (customer/store, set by the endpoint), `body`, `created_at`, `read_at`; index `(conversation_id, id)` for "messages after id N" polling |
+
+No uploaded files are stored. The delivery date used for the return window is
+the `delivered` row of `order_status_history`.
+
 ## Seed data
 
 ```bash

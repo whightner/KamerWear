@@ -3,7 +3,9 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     addresses,
     admin_catalog,
+    admin_returns,
     admin_store,
+    admin_support,
     admin_visual_search,
     auth,
     cart,
@@ -13,6 +15,8 @@ from app.api.v1.endpoints import (
     health,
     orders,
     products,
+    returns,
+    support,
     users,
     visual_search,
 )
@@ -32,3 +36,7 @@ api_router.include_router(admin_catalog.router)
 api_router.include_router(visual_search.router)
 api_router.include_router(admin_visual_search.router)
 api_router.include_router(fit.router)
+api_router.include_router(returns.router)
+api_router.include_router(admin_returns.router)
+api_router.include_router(support.router)
+api_router.include_router(admin_support.router)

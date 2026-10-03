@@ -10,6 +10,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { refresh } from "next/cache";
 import { mergeGuestCart, withCartNotice } from "@/lib/commerce/guest-cart";
+import { getCurrentUser } from "./session";
 import { authApi, type ApiFailure, type AuthTokens } from "./api";
 import {
   ACCESS_COOKIE,
@@ -259,4 +260,13 @@ export async function changePasswordAction(
   return {
     success: "Your password has been changed. Other devices have been signed out.",
   };
+}
+
+/**
+ * Called by client code before retrying a route-handler request whose access
+ * token had expired (route handlers skip the proxy): like every Server Action
+ * request, this one passes through the proxy, which renews the session once.
+ */
+export async function ensureSession(): Promise<boolean> {
+  return (await getCurrentUser()) !== null;
 }

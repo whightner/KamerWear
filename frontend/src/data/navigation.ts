@@ -12,8 +12,8 @@ export const mainNavigation: (NavLink & { highlight?: boolean })[] = [
   { label: "Deals", href: "/shop?deals=true", highlight: true },
 ];
 
-// Help pages arrive in a later task; until then these links point
-// to the homepage sections that describe them, or to future routes.
+// Delivery and FAQ still point to the homepage delivery section; returns and
+// contact have their own help pages.
 export const footerNavigation: { title: string; links: NavLink[] }[] = [
   {
     title: "Shop",
@@ -29,8 +29,8 @@ export const footerNavigation: { title: string; links: NavLink[] }[] = [
     title: "Help",
     links: [
       { label: "Delivery", href: "/#delivery" },
-      { label: "Returns", href: "/#delivery" },
-      { label: "Contact", href: "/#delivery" },
+      { label: "Returns", href: "/help/returns" },
+      { label: "Contact", href: "/help/contact" },
       { label: "FAQ", href: "/#delivery" },
     ],
   },
@@ -40,6 +40,8 @@ export const footerNavigation: { title: string; links: NavLink[] }[] = [
       { label: "My account", href: "/account" },
       { label: "Profile", href: "/account/profile" },
       { label: "Orders", href: "/orders" },
+      { label: "Returns", href: "/account/returns" },
+      { label: "Support", href: "/support" },
       { label: "Track order", href: "/orders/track" },
       { label: "Favorites", href: "/favorites" },
       { label: "Fit Profile", href: "/account/fit-profile" },

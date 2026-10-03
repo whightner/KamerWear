@@ -24,6 +24,20 @@ from app.models.order import (
     PaymentStatus,
     PaymentStatusHistory,
 )
+from app.models.returns import (
+    ReturnItem,
+    ReturnReason,
+    ReturnRequest,
+    ReturnStatus,
+    ReturnStatusHistory,
+)
+from app.models.support import (
+    ConversationStatus,
+    SenderRole,
+    SupportConversation,
+    SupportMessage,
+    SupportSubject,
+)
 from app.models.visual_search import ProductImageEmbedding, VisualSearchIndexRun
 from app.models.user import AuthSession, Role, User, UserProfile
 
@@ -33,6 +47,7 @@ __all__ = [
     "Cart",
     "CartItem",
     "Category",
+    "ConversationStatus",
     "Gender",
     "FitEstimate",
     "FitPreference",
@@ -49,7 +64,16 @@ __all__ = [
     "ProductImage",
     "ProductImageEmbedding",
     "ProductVariant",
+    "ReturnItem",
+    "ReturnReason",
+    "ReturnRequest",
+    "ReturnStatus",
+    "ReturnStatusHistory",
     "Role",
+    "SenderRole",
+    "SupportConversation",
+    "SupportMessage",
+    "SupportSubject",
     "User",
     "UserProfile",
     "VisualSearchIndexRun",

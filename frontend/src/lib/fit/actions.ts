@@ -4,7 +4,7 @@
 // pass through here: they go to the /api/fit/estimate route handler.
 
 import { redirect } from "next/navigation";
-import { getAccessToken, getCurrentUser } from "@/lib/auth/session";
+import { getAccessToken } from "@/lib/auth/session";
 import { fitApi } from "./api";
 
 export interface FitFormState {
@@ -62,13 +62,4 @@ export async function deleteFitProfile(): Promise<FitFormState> {
     return { error: result.message };
   }
   redirect("/account/fit-profile?deleted=1");
-}
-
-/**
- * Called by the photo step before retrying an upload whose access token had
- * expired: like every Server Action request, it passes through the proxy,
- * which renews the session once.
- */
-export async function ensureFitSession(): Promise<boolean> {
-  return (await getCurrentUser()) !== null;
 }

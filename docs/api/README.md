@@ -398,6 +398,41 @@ of stock; `nearest_available` in stock), `not_offered`, `missing_size`,
 `no_profile` or `unsupported` (not a Smart Fit product, or one-size). It never
 selects a variant or changes the cart.
 
+## Returns
+
+Rules and states: [../architecture/returns-support.md](../architecture/returns-support.md).
+All routes need `Authorization: Bearer`; another customer's order or return
+answers `404`.
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/orders/{order_number}/return-eligibility` | `eligible`, `code`/`message` when not, `delivered_at`, `return_deadline`, `window_days`, per line `purchased_quantity`, `already_returned`, `returnable_quantity`, and the order's `returns` |
+| `POST` | `/api/v1/returns` | `{order_number, items: [{order_item_id, quantity, reason, note?}], customer_note?}` → `201`. Reasons: `wrong_size`, `damaged`, `wrong_item`, `not_as_expected`, `changed_mind`, `other`. No owner, price or total fields are accepted |
+| `GET` | `/api/v1/returns` | my returns, newest first (`limit`, `offset`) |
+| `GET` | `/api/v1/returns/{return_number}` | items with purchase-time prices, `return_value`, `history` (customer notes only), `can_cancel`, `refund_note` once refunded |
+| `POST` | `/api/v1/returns/{return_number}/cancel` | only while `requested` |
+
+Errors: `order_not_found` / `return_not_found` 404, `return_not_eligible` /
+`return_window_expired` / `invalid_return_transition` 409,
+`return_quantity_exceeded` (with `max_quantity`) / `return_item_invalid` 422.
+
+## Support
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/support/conversations` | mine, latest activity first; `last_message_preview`, `unread_count`, linked `order_number`/`return_number` |
+| `POST` | `/api/v1/support/conversations` | `{subject, message, order_number?, return_number?}` → `201`; subjects `sizing`, `delivery`, `order_issue`, `return_question`, `other` |
+| `GET` | `/api/v1/support/conversations/{number}` | latest 200 messages, `last_message_id`; marks store messages read |
+| `GET` | `/api/v1/support/conversations/{number}/messages?after_id=N` | polling: only newer messages, plus `status` |
+| `POST` | `/api/v1/support/conversations/{number}/messages` | `{body}` (plain text, 1–2 000 characters) → `201` |
+| `POST` | `/api/v1/support/conversations/{number}/close` / `reopen` | |
+| `GET` | `/api/v1/support/unread-count` | `{unread}` store messages not read |
+
+Errors: `conversation_not_found` 404, `conversation_closed` 409,
+`message_empty` / `message_too_long` / `conversation_link_mismatch` 422,
+`too_many_messages` 429. Message bodies are returned exactly as stored and
+must be rendered as plain text.
+
 ## Admin API (ADMIN only)
 
 Every route below requires `Authorization: Bearer` for an **admin** account:
@@ -426,6 +461,16 @@ customers. Rules, state machines and the inventory policy:
 | `GET` | `/api/v1/admin/orders/{order_number}` | customer, items, delivery copy, `status_history` (with `internal_note`, `changed_by`), `payment_history`, `timeline`, `allowed_statuses`, `allowed_payment_statuses` |
 | `POST` | `/api/v1/admin/orders/{order_number}/status` | `{status, note?, internal_note?}`; `note` is shown to the customer |
 | `POST` | `/api/v1/admin/orders/{order_number}/payment-status` | `{payment_status, note?}` (manual/demo) |
+| `GET` | `/api/v1/admin/returns` | `q` (return/order number, email, name), `status`, `date_from`, `date_to`, `limit`, `offset` |
+| `GET` | `/api/v1/admin/returns/{return_number}` | customer, order (payment, delivered_at), items with `variant_id`/`restock`, history with `internal_note`/`changed_by`, `allowed_actions`, `can_mark_order_refunded` |
+| `POST` | `/api/v1/admin/returns/{return_number}/approve` / `reject` | `{note?, internal_note?}` (`note` is shown to the customer) |
+| `POST` | `/api/v1/admin/returns/{return_number}/receive` | `{items: [{return_item_id, restock}], note?, internal_note?}`; restockable lines add to `on_hand` once |
+| `POST` | `/api/v1/admin/returns/{return_number}/refund` | `{note?, internal_note?, mark_order_payment_refunded?}`; demo/manual record, no provider |
+| `GET` | `/api/v1/admin/support/conversations` | `q`, `status`, `unread_only`, `limit`, `offset` |
+| `GET` | `/api/v1/admin/support/conversations/{number}` | with `customer`, linked `order` and `return_request`; marks customer messages read |
+| `GET` / `POST` | `/api/v1/admin/support/conversations/{number}/messages` | poll (`after_id`) / reply as the store |
+| `POST` | `/api/v1/admin/support/conversations/{number}/close` / `reopen` | |
+| `GET` | `/api/v1/admin/attention` | `{returns_to_process, conversations_unread}` for the sidebar |
 | `GET` | `/api/v1/admin/visual-search/status` | model, `ready`, indexed / stale / unindexed / missing photos, last index run |
 | `POST` | `/api/v1/admin/visual-search/rebuild` | encode new or changed photos (`409 index_busy` if one is running, `503 visual_search_unavailable` without the model) |
 

@@ -6,7 +6,8 @@ import { StoreProvider } from "@/components/store/StoreProvider";
 import { Footer } from "@/components/storefront/Footer";
 import { Header } from "@/components/storefront/Header";
 import { StorefrontOnly } from "@/components/storefront/StorefrontOnly";
-import { getCurrentUser, getServerCart } from "@/lib/auth/session";
+import { supportApi } from "@/lib/after-sales/api";
+import { getAccessToken, getCurrentUser, getServerCart } from "@/lib/auth/session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,6 +29,8 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Only the first name reaches the browser; tokens stay in HttpOnly cookies.
   const [user, serverCart] = await Promise.all([getCurrentUser(), getServerCart()]);
+  // Store replies the customer hasn't read yet ("Support (2)" in the account menu).
+  const unread = user ? await supportApi.unread((await getAccessToken()) ?? "") : null;
 
   return (
     <html
@@ -40,7 +43,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Header
               account={
                 user
-                  ? { firstName: user.profile.first_name, isAdmin: user.role === "admin" }
+                  ? {
+                      firstName: user.profile.first_name,
+                      isAdmin: user.role === "admin",
+                      supportUnread: unread?.ok ? unread.data.unread : 0,
+                    }
                   : null
               }
             />

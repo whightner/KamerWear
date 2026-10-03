@@ -6,7 +6,15 @@ import type { User } from "@/lib/auth/api";
 import { AdminNav } from "./AdminNav";
 
 /** Operational layout: dark sidebar, cream workspace. */
-export function AdminShell({ user, children }: { user: User; children: ReactNode }) {
+export function AdminShell({
+  user,
+  counts,
+  children,
+}: {
+  user: User;
+  counts?: { returns: number; support: number };
+  children: ReactNode;
+}) {
   return (
     <div className="min-h-screen bg-cream lg:grid lg:grid-cols-[232px_1fr]">
       <aside className="relative bg-ink px-4 py-4 text-white lg:sticky lg:top-0 lg:h-screen lg:py-6">
@@ -18,7 +26,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
             </span>
           </Link>
         </div>
-        <AdminNav />
+        <AdminNav counts={counts} />
         <div className="mt-4 border-t border-white/15 pt-4 text-sm lg:absolute lg:inset-x-4 lg:bottom-6">
           <p className="truncate font-semibold">
             {user.profile.first_name} {user.profile.last_name}

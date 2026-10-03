@@ -34,8 +34,11 @@ variants, image metadata, stock and order fulfilment. **Search by image**
 (`/visual-search`) finds visually similar products with a pretrained vision
 model (OpenCLIP). **Smart Fit** (`/fit`) suggests clothing sizes from the
 customer's height and guided photos with a pretrained pose model (MediaPipe);
-the customer confirms the sizes, which then appear on product pages. Real
-payments and couriers are not built yet; see
+the customer confirms the sizes, which then appear on product pages.
+**Returns** (7 days after delivery, processed by staff with demo/manual
+refunds) and **support conversations** between customers and the store
+complete the after-sales side. Real payments and couriers are not built yet;
+see
 [Project status](#project-status).
 
 ## Architecture
@@ -273,6 +276,14 @@ storefront always fetches fresh data.
   nothing is saved until the customer confirms (`PUT /api/v1/fit/profile`).
   Shoe sizes are entered, never estimated. Details:
   [docs/architecture/smart-fit.md](docs/architecture/smart-fit.md).
+- Returns and support: customers request returns from a delivered order
+  (`/orders/[n]/return`, checked against the delivery date and purchased
+  quantities); staff approve/reject, mark items received with an explicit
+  restock choice per line and record a demo/manual refund (`/admin/returns`).
+  Support conversations (`/support`, `/admin/support`) are plain-text messages
+  in PostgreSQL; open conversation pages poll for new messages every 4
+  seconds. Details:
+  [docs/architecture/returns-support.md](docs/architecture/returns-support.md).
 
 ## Project status
 
@@ -290,4 +301,5 @@ storefront always fetches fresh data.
 | Admin dashboard: products, categories, variants, images, inventory, order fulfilment, demo payment states | Done (Task 008) |
 | Visual search by photo and visually similar products (pretrained OpenCLIP embeddings) | Done (Task 009); real-model quality check pending (weights must be downloaded first) |
 | Smart Fit: height + guided photos → estimated sizes → customer confirms → Fit Profile and product recommendations (pretrained MediaPipe pose model) | Done (Task 010); real-world accuracy not yet validated against tape measurements |
-| Real payments, courier integration, image upload, saved favorites, returns | Not started (future tasks) |
+| Returns (eligibility, quantities, state machine, restocking, demo refunds) and customer support conversations (polling) | Done (Task 011); no photo evidence or chat attachments yet |
+| Real payments, courier integration, image upload, saved favorites, notifications | Not started |

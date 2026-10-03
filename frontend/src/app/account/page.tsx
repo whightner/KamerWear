@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Heart, MapPin, Package, Ruler, UserRound, type LucideIcon } from "lucide-react";
+import {
+  Heart,
+  MapPin,
+  MessageCircle,
+  Package,
+  RotateCcw,
+  Ruler,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { Container } from "@/components/storefront/Container";
 import { requireUser } from "@/lib/auth/session";
@@ -21,22 +30,22 @@ export default async function AccountPage() {
 
   const tiles: Tile[] = [
     {
-      title: "Profile",
-      description: "Your name, phone number and password.",
-      icon: UserRound,
-      href: "/account/profile",
-    },
-    {
-      title: "Favorites",
-      description: "Items you saved during this visit (kept on this device only).",
-      icon: Heart,
-      href: "/favorites",
-    },
-    {
       title: "Orders",
       description: "Your order history and delivery tracking.",
       icon: Package,
       href: "/orders",
+    },
+    {
+      title: "Returns",
+      description: "Return requests for delivered orders and their status.",
+      icon: RotateCcw,
+      href: "/account/returns",
+    },
+    {
+      title: "Support",
+      description: "Conversations with the KamerWear team.",
+      icon: MessageCircle,
+      href: "/support",
     },
     {
       title: "Fit Profile",
@@ -49,6 +58,18 @@ export default async function AccountPage() {
       description: "Delivery addresses across Cameroon.",
       icon: MapPin,
       href: "/account/addresses",
+    },
+    {
+      title: "Favorites",
+      description: "Items you saved during this visit (kept on this device only).",
+      icon: Heart,
+      href: "/favorites",
+    },
+    {
+      title: "Profile",
+      description: "Your name, phone number and password.",
+      icon: UserRound,
+      href: "/account/profile",
     },
   ];
 

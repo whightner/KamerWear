@@ -18,6 +18,13 @@ JWT_ALGORITHM = "HS256"
 # dashboard and filters). Matches the storefront's "Only N left" label.
 LOW_STOCK_THRESHOLD = 5
 
+# Demo return policy: delivered orders can be returned for this many days
+# after the delivery recorded in the order's status history.
+RETURN_WINDOW_DAYS = 7
+
+# Support messages are plain text up to this length.
+SUPPORT_MESSAGE_MAX_LENGTH = 2000
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(

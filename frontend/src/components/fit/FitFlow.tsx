@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, ScanLine } from "lucide-react";
 import { TextField } from "@/components/auth/fields";
-import { ensureFitSession } from "@/lib/fit/actions";
+import { ensureSession } from "@/lib/auth/actions";
 import {
   HEIGHT_MAX,
   HEIGHT_MIN,
@@ -121,7 +121,7 @@ export function FitFlow({ profile }: FitFlowProps) {
     const code = detail?.code ?? "unavailable";
     if (response.status === 401) {
       // The access token expired: renew the session once, then retry.
-      if (retry && (await ensureFitSession())) return send(false);
+      if (retry && (await ensureSession())) return send(false);
       router.push("/login?next=/fit&reason=expired");
       return;
     }

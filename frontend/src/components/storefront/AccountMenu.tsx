@@ -2,13 +2,30 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, LayoutDashboard, LogOut, User, UserRound } from "lucide-react";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  MessageCircle,
+  Package,
+  RotateCcw,
+  User,
+  UserRound,
+} from "lucide-react";
 import { logoutAction } from "@/lib/auth/actions";
 
 // Header menu for a signed-in customer: "Hi, Alex" with Account, Profile and
 // Log out. Logging out is a form POST to a Server Action, so it works even
 // before JavaScript has loaded.
-export function AccountMenu({ firstName, isAdmin }: { firstName: string; isAdmin: boolean }) {
+export function AccountMenu({
+  firstName,
+  isAdmin,
+  supportUnread = 0,
+}: {
+  firstName: string;
+  isAdmin: boolean;
+  supportUnread?: number;
+}) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -43,11 +60,23 @@ export function AccountMenu({ firstName, isAdmin }: { firstName: string; isAdmin
         type="button"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={`Account menu for ${firstName}`}
+        aria-label={`Account menu for ${firstName}${
+          supportUnread ? `, ${supportUnread} unread support ${supportUnread === 1 ? "message" : "messages"}` : ""
+        }`}
         onClick={() => setOpen((value) => !value)}
         className="flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] font-medium text-ink hover:bg-cream sm:px-3"
       >
-        <User className="size-5" aria-hidden="true" />
+        <span className="relative">
+          <User className="size-5" aria-hidden="true" />
+          {supportUnread > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute -right-1.5 -top-1 flex size-4 items-center justify-center rounded-full bg-deal text-[10px] font-bold text-white"
+            >
+              {supportUnread > 9 ? "9+" : supportUnread}
+            </span>
+          )}
+        </span>
         <span aria-hidden="true" className="hidden max-w-24 items-center gap-0.5 lg:flex">
           <span className="truncate">Hi, {firstName}</span>
           <ChevronDown className="size-3 shrink-0" />
@@ -73,6 +102,30 @@ export function AccountMenu({ firstName, isAdmin }: { firstName: string; isAdmin
               <Link href="/account/profile" className={itemClass} onClick={() => setOpen(false)}>
                 <UserRound className="size-4" aria-hidden="true" />
                 Profile
+              </Link>
+            </li>
+            <li>
+              <Link href="/orders" className={itemClass} onClick={() => setOpen(false)}>
+                <Package className="size-4" aria-hidden="true" />
+                Orders
+              </Link>
+            </li>
+            <li>
+              <Link href="/account/returns" className={itemClass} onClick={() => setOpen(false)}>
+                <RotateCcw className="size-4" aria-hidden="true" />
+                Returns
+              </Link>
+            </li>
+            <li>
+              <Link href="/support" className={itemClass} onClick={() => setOpen(false)}>
+                <MessageCircle className="size-4" aria-hidden="true" />
+                Support
+                {supportUnread > 0 && (
+                  <span className="ml-auto rounded-full bg-deal px-1.5 text-xs font-bold text-white">
+                    {supportUnread}
+                    <span className="sr-only"> unread</span>
+                  </span>
+                )}
               </Link>
             </li>
             {isAdmin && (
