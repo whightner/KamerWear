@@ -64,6 +64,7 @@ mobile app could reuse it.
 | [docs/demo/README.md](docs/demo/README.md) | Demo preparation, startup, health check, recovery, demo paths |
 | [docs/qa-report.md](docs/qa-report.md) | Final QA results (tests, accessibility, performance, validation status) |
 | [docs/release-notes.md](docs/release-notes.md) | v1.0.0-demo release notes |
+| [docs/development/](docs/development/) | Project coding rules and the AI-assistant instruction files used during development |
 
 ## Stack
 
@@ -242,5 +243,5 @@ Details: [docs/security-privacy.md](docs/security-privacy.md).
 
 ## Project rules
 
-See [CLAUDE.md](CLAUDE.md) (coding rules) and the Figma design:
+See [docs/development/](docs/development/) (coding rules) and the Figma design:
 https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8

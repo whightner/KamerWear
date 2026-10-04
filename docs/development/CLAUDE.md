@@ -6,7 +6,7 @@ school MVP. Simple, readable, demo-reliable code matters more than anything clev
 ## Rules
 
 1. **Read this document before modifying the repository.**
-2. **Respect `frontend/AGENTS.md`.** The installed Next.js version may be newer than
+2. **Respect `docs/development/nextjs-AGENTS.md`.** The installed Next.js version may be newer than
    your training data. Read the docs under `frontend/node_modules/next/dist/docs/`
    before relying on any Next.js API.
 3. **Prefer understandable code over clever abstractions.** No generic repository
