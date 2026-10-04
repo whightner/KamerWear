@@ -132,7 +132,10 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
           />
         </aside>
 
-        <section aria-label="Products">
+        <section aria-labelledby="products-heading">
+          <h2 id="products-heading" className="sr-only">
+            Products
+          </h2>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <ul className="flex flex-wrap gap-2" aria-label="Active filters">
               {chips.map((chip) => (

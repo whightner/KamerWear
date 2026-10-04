@@ -21,7 +21,3 @@ python-multipart>=0.0.20  # multipart image uploads
 sqlalchemy>=2.0,<3
 psycopg[binary]>=3.2,<4
 alembic>=1.16,<2
-
-# Testing
-pytest>=8
-httpx2>=2.0  # used by FastAPI's TestClient

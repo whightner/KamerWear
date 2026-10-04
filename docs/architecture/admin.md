@@ -49,6 +49,8 @@ automatically.
 | `/admin/inventory` | Stock per variant, with filters |
 | `/admin/orders` | All orders, filters by status, payment status, city and search |
 | `/admin/orders/[orderNumber]` | Order details, fulfilment, payment state, history |
+| `/admin/returns`, `/admin/returns/[returnNumber]` | Return requests: approve/reject, receive with restock choice, demo refund |
+| `/admin/support`, `/admin/support/[conversationNumber]` | Customer conversations: read, reply, close/reopen |
 | `/admin/visual-search` | Visual search index status and "Update visual index" |
 
 ## Dashboard
@@ -155,8 +157,9 @@ pending ──► confirmed ──► preparing ──► shipped ──► out_
 | delivered | — (terminal) |
 | cancelled | — (terminal) |
 
-Orders can't be cancelled once handed to the courier (shipped); returns are a
-later task. Anything else is rejected with `409 invalid_order_transition`
+Orders can't be cancelled once handed to the courier (shipped); after
+delivery, items come back through returns (`/admin/returns`, see
+[returns-support.md](returns-support.md)). Anything else is rejected with `409 invalid_order_transition`
 (the message lists the allowed next statuses). The admin form only offers the
 allowed ones.
 
@@ -208,5 +211,5 @@ aren't indexed yet. See [visual-search.md](visual-search.md).
 ## Not included
 
 Real payments (MTN MoMo, Orange Money, cards), courier APIs, GPS tracking,
-returns/refunds workflow, customer administration, image upload, promotions,
-multi-vendor sellers.
+customer administration, image upload, promotions, multi-vendor sellers.
+Returns and support are documented in [returns-support.md](returns-support.md).

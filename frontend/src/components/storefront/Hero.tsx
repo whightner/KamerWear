@@ -73,7 +73,7 @@ export function Hero() {
                 Recommended size: M
               </p>
               <p className="text-xs text-muted">
-                Estimated · confirm before you buy
+                Example · estimated, confirm before you buy
               </p>
             </div>
           </div>

@@ -74,7 +74,7 @@ async function loadProduct(slug: string): Promise<{
   };
 }
 
-// Help pages arrive in a later task; these links point to their future routes.
+// Help pages for delivery, returns and contact.
 const services = [
   {
     title: "Delivery",

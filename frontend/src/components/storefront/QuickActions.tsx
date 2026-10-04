@@ -41,7 +41,7 @@ const actions: QuickAction[] = [
   },
   {
     title: "Fast Delivery",
-    description: "Precise delivery across supported Cameroon cities.",
+    description: "Delivery to supported Cameroon cities.",
     href: "#delivery",
     icon: Truck,
     iconClassName: "bg-gold text-ink",

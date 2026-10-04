@@ -1,4 +1,4 @@
-import { forwardJson, readBody } from "@/lib/api/forward";
+import { crossSiteRejection, forwardJson, readBody } from "@/lib/api/forward";
 
 // Staff side of a conversation: GET polls, POST replies as the store.
 // FastAPI allows these endpoints only for ADMIN accounts.
@@ -18,6 +18,8 @@ export async function POST(
   request: Request,
   ctx: RouteContext<"/api/admin/support/[number]/messages">,
 ) {
+  const rejected = crossSiteRejection(request);
+  if (rejected) return rejected;
   const { number } = await ctx.params;
   const body = (await readBody(request)) as { body?: unknown } | undefined;
   if (!body || typeof body.body !== "string") {

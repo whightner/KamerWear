@@ -1,4 +1,4 @@
-import { forwardJson, readBody } from "@/lib/api/forward";
+import { crossSiteRejection, forwardJson, readBody } from "@/lib/api/forward";
 
 // The customer's conversation: GET polls for messages after `after_id`,
 // POST sends a message. FastAPI checks that the conversation is theirs.
@@ -12,6 +12,8 @@ export async function GET(request: Request, ctx: RouteContext<"/api/support/[num
 }
 
 export async function POST(request: Request, ctx: RouteContext<"/api/support/[number]/messages">) {
+  const rejected = crossSiteRejection(request);
+  if (rejected) return rejected;
   const { number } = await ctx.params;
   const body = (await readBody(request)) as { body?: unknown } | undefined;
   if (!body || typeof body.body !== "string") {

@@ -44,8 +44,8 @@ export default async function HomePage() {
       <FlashSale products={flashSale} />
       <ProductSection
         id="recommended"
-        title="Recommended for you"
-        subtitle="Popular picks this week"
+        title="Popular picks"
+        subtitle="Featured items from our catalog"
         products={recommended}
         viewAllHref="/shop"
       />

@@ -377,9 +377,12 @@ assuming 175 cm because the people's real heights are unknown:
 
 ### Ground truth
 
-**Real-world accuracy is unvalidated.** No consenting person with
-tape-measured dimensions was available in the development environment, and
-the fixture photos have no known heights or measurements. Before relying on
+**Smart Fit is technically functional, but real-world measurement accuracy
+has not yet been validated against ground-truth tape measurements.** No
+consenting volunteer with tape-measured dimensions was available in the
+development environment (checked again in the final QA task, 2026-10-04), and
+the fixture photos have no known heights or measurements. No measurement
+comparison is reported because none was made. Before relying on
 the numbers, measure a few consenting volunteers (height, chest, waist, hips,
 inseam with a tape), take the guided photos, compare, and record only the
 differences (no photos or identifying details in the repository).

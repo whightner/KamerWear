@@ -112,7 +112,7 @@ export default async function AdminDashboard() {
             />
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_380px]">
+          <div className="mt-6 grid gap-6 2xl:grid-cols-[1fr_380px]">
             <Panel
               title="Recent orders"
               actions={<Link href="/admin/orders" className="text-sm font-semibold text-ink underline underline-offset-2">All orders</Link>}

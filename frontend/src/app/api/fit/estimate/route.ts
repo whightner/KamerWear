@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { apiUrl } from "@/lib/api-config";
+import { crossSiteRejection } from "@/lib/api/forward";
 import { ACCESS_COOKIE, secondsUntilExpiry } from "@/lib/auth/cookies";
 
 // Forwards the Smart Fit photos to FastAPI with the customer's access token
@@ -17,6 +18,8 @@ function error(status: number, code: string, message: string, photo?: string) {
 }
 
 export async function POST(request: Request) {
+  const rejected = crossSiteRejection(request);
+  if (rejected) return rejected;
   const access = (await cookies()).get(ACCESS_COOKIE)?.value;
   if (secondsUntilExpiry(access) <= 10) {
     return error(401, "session_expired", "Your session has expired. Please log in again.");

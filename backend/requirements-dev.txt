@@ -1,0 +1,6 @@
+# Development and testing tools (not needed to run the API).
+#   pip install -r requirements-dev.txt
+-r requirements.txt
+pytest>=8
+httpx2>=2.0  # used by FastAPI's TestClient
+ruff>=0.15,<0.17

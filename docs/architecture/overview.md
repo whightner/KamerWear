@@ -1,100 +1,117 @@
-# Architecture overview
+# Architecture overview (v1.0.0-demo)
 
-KamerWear is a **modular monolith**. A single Next.js web app talks to a single
-FastAPI application, which owns a single PostgreSQL database. This is the
-simplest architecture that supports the MVP, and it is easy to run locally for a demo.
+KamerWear is a **modular monolith**: one Next.js web app, one FastAPI
+application and one PostgreSQL database. The two pretrained AI models run
+inside the FastAPI process. There are no microservices, message queues, Redis
+or external AI APIs; this keeps the academic demo simple to install and run.
 
 ```
-Browser
-   ↓
-Next.js / React
-   ↓
-REST API  (JSON over HTTP, /api/v1)
-   ↓
-FastAPI
-   ↓
-PostgreSQL
+                         ┌──────────────────────────┐
+     Browser ──────────► │   Next.js web (frontend) │  pages, Server Actions,
+   (phone / desktop)     │   + BFF route handlers   │  HttpOnly auth cookies
+                         └────────────┬─────────────┘
+                                      │ REST / JSON  (/api/v1, Bearer token)
+                         ┌────────────▼─────────────┐
+                         │     FastAPI (backend)    │  validation, business rules,
+                         │                          │  authorization, rate limits
+                         └──┬──────────┬─────────┬──┘
+                            │          │         │
+                ┌───────────▼──┐ ┌─────▼──────┐ ┌▼───────────────────┐
+                │ PostgreSQL 18│ │ OpenCLIP   │ │ MediaPipe Pose     │
+                │ business data│ │ ViT-B-32   │ │ Landmarker (heavy) │
+                │ + embeddings │ │ visual     │ │ Smart Fit          │
+                └──────────────┘ │ search     │ └────────────────────┘
+                                 └────────────┘
+               (models are local files, loaded lazily, CPU; optional packages)
 ```
+
+## Modules
+
+| Module | Backend | Web | Docs |
+| --- | --- | --- | --- |
+| Auth & accounts | `services/auth.py`, `endpoints/auth.py`, `users.py` | `/login`, `/register`, `/account/*`, `proxy.ts` | [auth.md](auth.md) |
+| Catalog | `services/catalog.py`, `endpoints/products.py`, `categories.py` | `/`, `/shop`, `/product/[slug]` | [../api/README.md](../api/README.md) |
+| Cart, addresses, checkout, orders | `services/cart.py`, `addresses.py`, `orders.py`, `delivery.py` | `/cart`, `/checkout`, `/orders/*`, `/account/addresses` | [commerce.md](commerce.md) |
+| Admin | `services/admin_catalog.py`, `admin_store.py`, `endpoints/admin_*` | `/admin/*` | [admin.md](admin.md) |
+| Returns | `services/returns.py`, `endpoints/returns.py`, `admin_returns.py` | `/orders/[n]/return`, `/account/returns`, `/returns/[n]`, `/admin/returns` | [returns-support.md](returns-support.md) |
+| Support | `services/support.py`, `endpoints/support.py`, `admin_support.py` | `/support/*`, `/admin/support` | [returns-support.md](returns-support.md) |
+| Visual search | `app/ai/*`, `services/visual_search.py` | `/visual-search`, "Find Similar" | [visual-search.md](visual-search.md) |
+| Smart Fit | `app/fit/*`, `services/fit.py` | `/fit`, `/account/fit-profile`, product block | [smart-fit.md](smart-fit.md) |
+| Demo tooling | `app/db/reset_demo.py`, `check_integrity.py`, `app/demo/healthcheck.py` | — | [../demo/README.md](../demo/README.md) |
 
 ## Layers
 
-### Browser
+### Next.js (`frontend/`, App Router, TypeScript, Tailwind)
 
-Customers use KamerWear in a web browser, on a phone or a desktop. The UI follows the
-Figma product board.
-
-### Next.js / React (`frontend/`)
-
-- Renders pages and handles UI state.
-- Calls the backend REST API. It holds no business rules and never accesses the
-  database directly.
-- Reads the API base URL from `NEXT_PUBLIC_API_URL`.
-- Holds the customer's auth tokens in HttpOnly cookies and forwards them to the
-  API from the server; see [auth.md](auth.md).
-- Shows carts, checkout totals and orders exactly as the API returns them; the
-  API computes prices, fees, stock and totals. See [commerce.md](commerce.md).
-- Hosts the store admin under `/admin`; the API decides who is an admin.
-  See [admin.md](admin.md).
-
-### REST API
-
-- JSON over HTTP, versioned under `/api/v1`.
-- Is the only contract between clients and the backend. A future mobile app
-  will use the same endpoints, so responses must not assume a web client.
-- CORS restricts browser access to the configured frontend origins.
-- See [../api/README.md](../api/README.md) for conventions.
+- Server Components fetch from the API on each request; the browser never
+  talks to FastAPI directly.
+- Auth tokens live only in HttpOnly, SameSite=Lax cookies; the Next.js server
+  forwards the access token as a Bearer header. `proxy.ts` renews sessions and
+  keeps signed-out visitors out of account, order, return, support and admin
+  pages (the API enforces the same rules).
+- Mutations use Server Actions (POST-only, Origin-checked by Next.js). A few
+  route handlers act as a small BFF for uploads and chat polling; their
+  cookie-authenticated POSTs check the Origin header too.
+- No business rules: prices, totals, stock, eligibility and sizes come from
+  the API. React escapes all text; no raw HTML is rendered anywhere.
 
 ### FastAPI (`backend/`)
 
-The backend is one Python application, split into modules by responsibility:
-
 | Package | Responsibility |
 | --- | --- |
-| `app/api/v1/endpoints/` | HTTP routes: validate input, call services, return schemas |
-| `app/schemas/` | Pydantic request/response models (the API contract) |
+| `app/api/v1/endpoints/` | HTTP routes: parse input, call a service, return a schema |
+| `app/schemas/` | Pydantic request/response models (`extra="forbid"` on inputs) |
 | `app/services/` | Business logic, testable without HTTP |
-| `app/models/` | SQLAlchemy models (database tables) |
-| `app/db/` | Declarative base and database sessions |
-| `app/core/` | Configuration, password hashing and JWTs, rate limiting |
+| `app/models/` | SQLAlchemy 2 models |
+| `app/ai/` | Visual search: image loading, OpenCLIP encoder, type guard, CLIs |
+| `app/fit/` | Smart Fit: pose backend, measurement geometry, size charts |
+| `app/core/` | Settings, password hashing/JWT, in-memory rate limits |
+| `app/db/` | Sessions, seed, admin creation, demo reset, integrity checks |
 
-As features arrive (catalog, cart, orders, …), each one adds its own endpoint,
-schema, service and model files. They stay inside this same application.
+Errors are structured `{"detail": {"code", "message"}}`; stack traces are
+never returned.
 
-### PostgreSQL
+### PostgreSQL 18
 
-- The single source of truth for all business data.
-- Schema changes are managed by Alembic migrations in `backend/alembic/`.
-- See [../database/README.md](../database/README.md) for conventions.
+The single source of truth (24 tables, Alembic migrations). Money is stored as
+integer XAF. Visual-search embeddings are float32 bytes in the same database
+(about 70 vectors; NumPy computes similarities in memory). See
+[../database/er.md](../database/er.md).
+
+### AI models (optional)
+
+- **OpenCLIP ViT-B-32 / laion2b_s34b_b79k**: image and text embeddings for
+  visual search. Weights (~600 MB) downloaded once by
+  `python -m app.ai.prepare_visual_search`.
+- **MediaPipe Pose Landmarker heavy** (30.7 MB, SHA-256 pinned): body
+  landmarks and outline for Smart Fit, prepared by
+  `python -m app.ai.prepare_smart_fit`.
+
+Both load lazily on first use, run on CPU, never download at request time
+and fail closed (`visual_search_unavailable` / `fit_service_unavailable`)
+without fake fallback results. Neither is trained on customer photos.
+
+## Request flow example (placing an order)
+
+1. The checkout page (Server Component) loads the cart and a server quote.
+2. "Place order" calls a Server Action with an idempotency key.
+3. FastAPI locks the cart, re-checks prices and stock, reserves inventory,
+   copies address and lines into the order, empties the cart, commits.
+4. Staff move the order through the state machine in `/admin/orders`;
+   delivery converts the reservation, cancellation releases it, exactly once.
+
+## Deliberately not used
+
+Microservices, Kubernetes, Redis, message queues, Elasticsearch, WebSockets,
+external AI APIs, payment and courier integrations. See the README's
+"Known limitations" and "Future work".
 
 ## Future external services (not implemented)
 
-Several roadmap features will rely on outside services. None of them is part
-of the current code. When one is added, the backend calls it from a small
-service module in `app/services/`, and the frontend keeps talking only to the
-KamerWear API.
-
 | Service | Purpose |
 | --- | --- |
-| Image / object storage | Store product photos and customer-uploaded images (e.g. an S3-compatible bucket) |
-| Visual-search engine | Implemented in-process in Task 009 with a pretrained OpenCLIP model (see [visual-search.md](visual-search.md)); a dedicated service would only be needed at much larger scale |
-| AI Fit service | Implemented in-process in Task 010 with a pretrained MediaPipe pose model (see [smart-fit.md](smart-fit.md)) |
-| Payment provider | Mobile Money (MTN MoMo, Orange Money) and card payments |
-| Delivery provider | Shipping quotes and parcel tracking within Cameroon (and courier return pickup) |
-| Notifications (email/SMS/push) | Tell customers about support replies and return updates; today they see them in their account (support pages poll while open, see [returns-support.md](returns-support.md)) |
-
-```
-                      ┌──────────────────────┐
-                      │       FastAPI        │
-                      └──────────┬───────────┘
-        ┌──────────────┬─────────┼──────────┬──────────────┐
-        ↓              ↓         ↓          ↓              ↓
-   PostgreSQL    Object storage  Visual   AI Fit     Payment / delivery
-                                 search   service    providers
-                     (future)  (in-process) (in-process) (future)
-```
-
-## Deliberately out of scope
-
-To keep the MVP small and reliable, the project does **not** use
-microservices, Kubernetes, Redis, message brokers (RabbitMQ/Kafka) or
-Elasticsearch. Search starts with PostgreSQL.
+| Object storage | Admin photo uploads and return evidence photos |
+| Payment providers | MTN MoMo, Orange Money, cards (today: manual demo states) |
+| Courier APIs | Delivery quotes, tracking, return pickup |
+| Notifications | Email/SMS/push for order, return and support updates |
+| Shared rate limiting / observability | Needed when running several API workers |

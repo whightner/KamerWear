@@ -42,6 +42,23 @@ export async function forwardJson(
   return Response.json(body, { status: response.status });
 }
 
+/**
+ * CSRF defence in depth for cookie-authenticated POST route handlers (Server
+ * Actions get this check from Next.js; route handlers don't): the request's
+ * Origin must be this site. SameSite=Lax cookies already block other sites.
+ */
+export function crossSiteRejection(request: Request): Response | null {
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (!origin || !host) return error(403, "forbidden_origin", "This request isn't allowed.");
+  try {
+    if (new URL(origin).host === host) return null;
+  } catch {
+    /* malformed Origin */
+  }
+  return error(403, "forbidden_origin", "This request isn't allowed.");
+}
+
 /** The JSON body of a browser request, limited in size. */
 export async function readBody(request: Request, maxBytes = 16 * 1024): Promise<unknown> {
   const length = Number(request.headers.get("content-length") ?? "0");

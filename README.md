@@ -1,123 +1,88 @@
 # KamerWear
 
-KamerWear is a fashion e-commerce platform, starting with Cameroon. It sells
-shoes, clothes, streetwear, accessories and other wearable fashion products.
-Prices are in **XAF (FCFA)**.
+**KamerWear v1.0.0-demo** is an academic/demo MVP of a fashion e-commerce
+platform for Cameroon: shoes, clothes and accessories, priced in **XAF (FCFA)**,
+with delivery to Cameroonian cities, an admin back office and two AI-assisted
+features (visual search and Smart Fit). It was built in two weeks as a school
+project. The code favours clarity and reliability over cleverness. It is not a
+production-certified shop: payments and couriers are simulated.
 
-This repository is a school/project MVP with a demo scheduled about two weeks
-after project start. The code favours clarity and reliability over cleverness.
+## The problem
 
-## Product scope
+Online fashion shoppers in Cameroon often can't try items on, describe what
+they want in words, or easily follow and return orders. KamerWear explores:
 
-The product is built task by task. The roadmap includes:
+- **finding products from a photo** (visual search), instead of guessing keywords;
+- **estimating a clothing size** from the customer's height and two guided
+  photos (Smart Fit), always confirmed by the customer;
+- a complete, trustworthy order flow: server-calculated totals, tracking,
+  returns and support conversations;
+- a simple back office for a small store team.
 
-- product browsing, categories and search
-- visual/camera search and "find similar" from an image
-- favorites, shopping cart and checkout
-- Cameroon delivery addresses and order tracking
-- customer/store chat, returns and refunds
-- promotions and flash deals
-- customer Fit Profile with AI-assisted size recommendation
-- admin dashboard
+## Features
 
-UI direction comes from the Figma file:
-https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8
-(V2 product board: `node-id=12-2`, developer handoff: `node-id=12-718`).
+| Customers | Store staff (`/admin`) |
+| --- | --- |
+| Registration, login, profile, password change | Dashboard (orders, stock, returns and support badges) |
+| Delivery addresses across Cameroon | Products, categories, variants, image metadata |
+| Catalog with search, filters, sorting | Inventory (on-hand stock; reserved is order-controlled) |
+| Product pages with colour/size variants and live stock | Order fulfilment with a strict state machine |
+| Favorites (current visit) | Manual (demo) payment states |
+| Cart saved to the account; guest cart merged at login | Returns: approve/reject, receive with per-item restock, demo refund |
+| Checkout with server-calculated delivery fee and total | Support conversations with customers |
+| Order history and tracking timeline | Visual search index status and rebuild |
+| **Visual search** by photo and "Find Similar" | |
+| **Smart Fit** size recommendations (review and confirm) | |
+| Returns within 7 days of delivery | |
+| Support conversations (optionally about an order/return) | |
 
-### Current scope
-
-The storefront reads a real catalog from the API. Customers can create an
-account, save delivery addresses, keep a cart in their account, check out with
-a demo payment method, and follow their orders with status tracking. Store
-staff run the shop from an admin dashboard at `/admin`: products, categories,
-variants, image metadata, stock and order fulfilment. **Search by image**
-(`/visual-search`) finds visually similar products with a pretrained vision
-model (OpenCLIP). **Smart Fit** (`/fit`) suggests clothing sizes from the
-customer's height and guided photos with a pretrained pose model (MediaPipe);
-the customer confirms the sizes, which then appear on product pages.
-**Returns** (7 days after delivery, processed by staff with demo/manual
-refunds) and **support conversations** between customers and the store
-complete the after-sales side. Real payments and couriers are not built yet;
-see
-[Project status](#project-status).
+Screenshots of the clean demo data are in [docs/screenshots/](docs/screenshots/).
 
 ## Architecture
 
-A **modular monolith**: one web frontend, one API, one database.
+A **modular monolith**: one Next.js web app, one FastAPI API, one PostgreSQL
+database; the pretrained AI models run inside the API process.
 
 ```
-Browser
-   ↓
-Next.js / React        (frontend/)
-   ↓  REST + JSON over HTTP
-FastAPI                (backend/)
-   ↓  SQLAlchemy
-PostgreSQL
+Browser ──► Next.js (pages, Server Actions, small BFF) ──REST /api/v1──► FastAPI
+                                                                   ├── PostgreSQL 18
+                                                                   ├── OpenCLIP ViT-B-32  (visual search)
+                                                                   └── MediaPipe Pose     (Smart Fit)
 ```
 
-The frontend never talks to the database. All business rules live in the API, so a future mobile
-app can reuse the same endpoints. See
-[docs/architecture/overview.md](docs/architecture/overview.md) for details and
-for the external services planned for later.
+The browser only talks to Next.js; tokens stay in HttpOnly cookies; all
+business rules (prices, stock, eligibility, sizes) live in the API, so a future
+mobile app could reuse it.
 
-### Frontend stack
+| Document | Content |
+| --- | --- |
+| [docs/architecture/overview.md](docs/architecture/overview.md) | Final architecture, modules, request flow |
+| [docs/architecture/](docs/architecture/) | Auth, commerce, admin, visual search, Smart Fit, returns & support |
+| [docs/database/er.md](docs/database/er.md) | Entity–relationship overview (24 tables) |
+| [docs/api/inventory.md](docs/api/inventory.md) | Endpoint inventory; details in [docs/api/README.md](docs/api/README.md) |
+| [docs/security-privacy.md](docs/security-privacy.md) | Security review, authorization matrix, data inventory, audits |
+| [docs/demo/README.md](docs/demo/README.md) | Demo preparation, startup, health check, recovery, demo paths |
+| [docs/qa-report.md](docs/qa-report.md) | Final QA results (tests, accessibility, performance, validation status) |
+| [docs/release-notes.md](docs/release-notes.md) | v1.0.0-demo release notes |
 
-- Next.js (App Router) with React
-- TypeScript
-- Tailwind CSS
-- ESLint
-- Source code under `frontend/src/`
+## Stack
 
-### Backend stack
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, ESLint
+- **Backend**: Python 3.14 (3.11+ should work; developed and tested on 3.14.8),
+  FastAPI, Uvicorn, Pydantic 2, SQLAlchemy 2, psycopg 3, Alembic, Argon2id, PyJWT
+- **Database**: PostgreSQL 18 (tested on 18.4)
+- **AI (optional)**: open_clip + PyTorch (visual search), MediaPipe (Smart Fit)
+- **Tests**: pytest, ruff; Playwright + axe-core were used for browser checks
 
-- Python 3.11+ (developed with 3.14)
-- FastAPI, served by Uvicorn
-- Pydantic and pydantic-settings for validation and configuration
-- SQLAlchemy 2.x ORM with the psycopg 3 PostgreSQL driver
-- Alembic for database migrations
-- pytest for tests
+## Setup from zero
 
-## Project structure
+Prerequisites: Git, Python 3.11+ (3.14 tested), PostgreSQL 18, Node.js 20.9+
+with npm.
 
-```
-KamerWear/
-├── frontend/                 Next.js app (see frontend/AGENTS.md)
-├── backend/
-│   ├── app/
-│   │   ├── api/v1/           REST endpoints, mounted under /api/v1
-│   │   ├── db/               SQLAlchemy base and session
-│   │   ├── core/             settings, password hashing/JWT, rate limiting
-│   │   ├── models/           database models (catalog, users, addresses, carts, orders)
-│   │   ├── schemas/          request/response models
-│   │   ├── services/         business logic (catalog, auth, cart, orders, delivery fees)
-│   │   └── main.py           FastAPI application
-│   ├── alembic/              migrations
-│   ├── tests/
-│   ├── alembic.ini
-│   ├── requirements.txt
-│   └── .env.example
-├── docs/
-│   ├── architecture/
-│   ├── api/
-│   └── database/
-├── .env.example              which env file each app uses
-├── CLAUDE.md                 rules for coding agents
-└── README.md
-```
-
-## Development setup
-
-Prerequisites: Python 3.11+, PostgreSQL 16+ (tested on 16 and 18), Node.js 20.9+ and npm, Git.
-
-The storefront needs **both services running**: product data comes from the
-FastAPI catalog API, which reads PostgreSQL. Without the API the storefront
-shows a "couldn't load the catalog" message (there is no offline product copy).
-
-### 1. Database
-
-Create an empty database named `kamerwear`:
+### 1. Clone and create the database
 
 ```bash
+git clone <repository-url> KamerWear && cd KamerWear
 psql -U postgres -c "CREATE DATABASE kamerwear;"
 ```
 
@@ -126,180 +91,156 @@ psql -U postgres -c "CREATE DATABASE kamerwear;"
 ```bash
 cd backend
 python -m venv .venv
-
-# Activate the virtualenv
-source .venv/bin/activate          # macOS / Linux
-.venv\Scripts\Activate.ps1         # Windows PowerShell
-
-pip install -r requirements.txt
-
-# Configure: copy the example, then put your PostgreSQL password in DATABASE_URL
-# and a random JWT_SECRET_KEY (see the comment in the file for a command).
-cp .env.example .env               # Windows: copy .env.example .env
-
-alembic upgrade head               # create the catalog, account and order tables
-python -m app.db.seed              # load the demo catalog (safe to run again)
-uvicorn app.main:app --reload      # http://localhost:8000
+source .venv/bin/activate                # Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt          # add requirements-dev.txt for tests and lint
+cp .env.example .env                     # Windows: copy .env.example .env
 ```
 
-Create an admin account to use the store admin at http://localhost:3000/admin
-(prompts for the details; nothing is hard-coded, and the seed never creates
-users):
+Edit `backend/.env`: put your PostgreSQL password in `DATABASE_URL` and a
+random `JWT_SECRET_KEY`
+(`python -c "import secrets; print(secrets.token_urlsafe(48))"`). Placeholders
+are refused at startup.
 
 ```bash
+alembic upgrade head                     # create all tables
+```
+
+Then either load the **demo presentation data** (recommended; deletes users and
+orders, see [docs/demo/README.md](docs/demo/README.md)):
+
+```bash
+export DEMO_ADMIN_EMAIL=... DEMO_ADMIN_PASSWORD=...            # your choice, ≥ 10 characters
+export DEMO_CUSTOMER_EMAIL=... DEMO_CUSTOMER_PASSWORD=...
+python -m app.db.reset_demo --yes
+```
+
+or only the catalog, plus an admin you type in:
+
+```bash
+python -m app.db.seed
 python -m app.db.create_admin
 ```
 
-Optional — visual search (needs ~600 MB of model weights, downloaded once;
-see [docs/architecture/visual-search.md](docs/architecture/visual-search.md)):
+Start the API:
 
 ```bash
-pip install -r requirements-visual-search.txt
-python -m app.ai.prepare_visual_search   # download + self-test (needs internet once)
-python -m app.ai.visual_search_index     # encode the catalog photos
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Without these steps the shop works normally and `/visual-search` explains that
-image search is unavailable.
-
-Optional — Smart Fit photo sizing (a ~30 MB pose model, downloaded once; on
-Linux also `sudo apt-get install libegl1 libgles2`; see
-[docs/architecture/smart-fit.md](docs/architecture/smart-fit.md)):
-
-```bash
-pip install -r requirements-smart-fit.txt
-python -m app.ai.prepare_smart_fit            # download + SHA-256 check + self-test
-python -m app.ai.prepare_smart_fit --offline  # before a demo: verify without network
-```
-
-Without it, photo estimates answer "unavailable" and customers can still enter
-their sizes manually.
-
-Orders are fulfilled in the admin (`/admin/orders`). The same transitions are
-also available from the command line:
-
-```bash
-python -m app.db.set_order_status KW-2026-7K4M9Q shipped --note "Left the Douala hub"
-```
-
-Useful URLs:
-
-- http://localhost:8000/ is the API identification
-- http://localhost:8000/api/v1/health is the health check
-- http://localhost:8000/docs is the interactive API documentation
-- http://localhost:8000/api/v1/products lists the demo catalog
-
-Run the tests. Catalog tests use a separate `kamerwear_test` database (created
-automatically) and are skipped if PostgreSQL is not running:
-
-```bash
-pytest
-```
+API docs: http://localhost:8000/docs · health: http://localhost:8000/api/v1/health
 
 ### 3. Frontend
 
-In a second terminal (keep the backend running):
-
 ```bash
 cd frontend
-npm install
+npm ci
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1" > .env.local
+npm run build && npm run start           # production build on http://localhost:3000
+# or for development: npm run dev
 ```
 
-Create `frontend/.env.local` (next to `package.json`):
+Open **http://localhost:3000** (use `localhost`: auth cookies are Secure in
+production builds, which browsers allow on localhost).
 
-```
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-```
-
-Then:
+### 4. AI models (optional, internet needed once)
 
 ```bash
-npm run dev      # http://localhost:3000
+cd backend
+pip install -r requirements-smart-fit.txt       # Linux: sudo apt-get install libegl1 libgles2
+python -m app.ai.prepare_smart_fit              # 30 MB, SHA-256 verified, self-test
+pip install -r requirements-visual-search.txt   # PyTorch + open_clip
+python -m app.ai.prepare_visual_search          # ~600 MB from Hugging Face, self-test
+python -m app.ai.visual_search_index            # encode the catalog photos
+
+# before a presentation, verify without network:
+python -m app.ai.prepare_smart_fit --offline
+python -m app.ai.prepare_visual_search --offline   # then set VISUAL_SEARCH_OFFLINE=true
+```
+
+Without them the shop works normally; the two features say they are
+unavailable and never show fake results.
+
+### 5. Check everything
+
+```bash
+cd backend
+python -m app.demo.healthcheck          # database, API, web, logins, visual index, Smart Fit model
+python -m app.db.check_integrity        # inventory/order/return/support invariants
+```
+
+## Testing
+
+```bash
+cd backend && pip install -r requirements-dev.txt
+pytest                                  # uses a separate kamerwear_test database (created automatically)
+ruff check app tests          # settings in backend/ruff.toml
+
+cd frontend
 npm run lint
 npm run build
 ```
 
-### Day-to-day
+Database tests are skipped if PostgreSQL isn't reachable. Optional tests for
+the real models skip when their packages or weights are missing. Final
+results are in [docs/qa-report.md](docs/qa-report.md).
 
-| Terminal | Command |
-| --- | --- |
-| A — API | `cd backend` → activate the virtualenv → `uvicorn app.main:app --reload` |
-| B — web | `cd frontend` → `npm run dev` |
+## Security and privacy highlights
 
-After changing the seed data, run `python -m app.db.seed` again; the
-storefront always fetches fresh data.
+- Argon2id passwords; short-lived JWTs; single-use rotating refresh tokens
+  with reuse detection; logout and password change revoke sessions.
+- Tokens only in HttpOnly SameSite=Lax cookies; Server Actions and the
+  cookie-authenticated route handlers check the request origin.
+- Every resource is owner-checked by the API (another customer's order,
+  return or conversation answers 404); all admin routes require the ADMIN role.
+- Prices, totals, fees, stock, refunds and roles are never accepted from the
+  browser.
+- No raw HTML is rendered; uploads are validated by content, size and
+  dimensions, decoded in memory, stripped of EXIF and never stored.
+- Stored personal data: account, profile, addresses, orders, returns, support
+  messages, confirmed Fit Profile. Not stored: search photos, body photos,
+  payment card data or PINs.
 
-## How the frontend and backend communicate
+Details: [docs/security-privacy.md](docs/security-privacy.md).
 
-- The frontend calls the backend over HTTP using JSON, at the base URL in
-  `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000/api/v1`).
-- Catalog requests are made by the Next.js server while rendering pages
-  (`frontend/src/lib/api/catalog.ts`, always fresh: `cache: "no-store"`), so the
-  browser only talks to the Next.js app. Product images are static files served
-  by Next.js from `frontend/public/images`; the API stores only their paths.
-- `/shop` keeps filters, search, sorting and page in the URL and passes them to
-  `GET /api/v1/products`; the API does all filtering.
-- Every backend endpoint is versioned under `/api/v1`.
-- The backend allows browser requests only from the origins listed in
-  `CORS_ORIGINS` (default `http://localhost:3000`). Wildcard `*` is rejected.
-- Money is exchanged as integers in XAF (e.g. `15000` means 15 000 FCFA).
-- Accounts: login, registration and the account pages use Next.js Server
-  Actions that call `/api/v1/auth/*` and `/api/v1/users/me`. Tokens are kept
-  in HttpOnly cookies on the Next.js site and sent to FastAPI as a Bearer
-  header; browser JavaScript never sees them. `/account` and
-  `/account/profile` require a session. Details, including CSRF and token
-  refresh: [docs/architecture/auth.md](docs/architecture/auth.md).
-- Cart and checkout: a signed-in customer's cart is saved in PostgreSQL; a
-  guest's cart lives in browser memory and is merged into the account at
-  login (checkout requires an account). FastAPI calculates every price, the
-  delivery fee (demo rule: Douala 1 500, Yaoundé 2 000, Bafoussam 2 500, other
-  cities 3 500 FCFA) and the total, re-checks stock with row locks and reserves
-  it when the order is placed. Mobile Money, Card and Cash on Delivery are
-  **demo** methods: no payment is taken and no card or PIN is ever requested.
-  Details: [docs/architecture/commerce.md](docs/architecture/commerce.md).
-- Store admin: `/admin` pages use the same session cookies and call
-  `/api/v1/admin/*`, which FastAPI allows only for ADMIN accounts (customers get
-  403 and a "Not authorized" page). Products, variants and categories are
-  deactivated rather than deleted; staff set physical stock (`on_hand`) but
-  never `reserved`; orders follow a fixed state machine that adjusts stock
-  exactly once. Details: [docs/architecture/admin.md](docs/architecture/admin.md).
-- Visual search: `/visual-search` sends the photo through a Next.js route
-  handler to `POST /api/v1/visual-search`. FastAPI encodes it with a
-  pretrained OpenCLIP model, compares it with the stored embeddings of the
-  catalog photos (cosine similarity) and returns ranked products. The photo is
-  not stored. Details:
-  [docs/architecture/visual-search.md](docs/architecture/visual-search.md).
-- Smart Fit: `/fit` sends the photos through the `/api/fit/estimate` route
-  handler to `POST /api/v1/fit/estimate`. FastAPI finds body landmarks and the
-  body outline with MediaPipe Pose Landmarker, scales them by the typed height
-  and suggests sizes from versioned demo size charts. Photos are discarded;
-  nothing is saved until the customer confirms (`PUT /api/v1/fit/profile`).
-  Shoe sizes are entered, never estimated. Details:
-  [docs/architecture/smart-fit.md](docs/architecture/smart-fit.md).
-- Returns and support: customers request returns from a delivered order
-  (`/orders/[n]/return`, checked against the delivery date and purchased
-  quantities); staff approve/reject, mark items received with an explicit
-  restock choice per line and record a demo/manual refund (`/admin/returns`).
-  Support conversations (`/support`, `/admin/support`) are plain-text messages
-  in PostgreSQL; open conversation pages poll for new messages every 4
-  seconds. Details:
-  [docs/architecture/returns-support.md](docs/architecture/returns-support.md).
+## Known limitations
 
-## Project status
+- **Payments are simulated**: Mobile Money, card and cash on delivery are demo
+  choices; payment and refund states are recorded manually by staff.
+- **No courier integration**: delivery fees are a flat demo rule per city;
+  statuses are updated by staff; no return pickup.
+- **Visual search real-weight validation is pending**: the pretrained
+  OpenCLIP weights could not be downloaded in the development environment
+  (Hugging Face blocked), so result quality with the real model is unverified;
+  thresholds are untuned.
+- **Smart Fit accuracy is unvalidated**: the real pose model runs, but no
+  comparison with tape measurements on consenting volunteers has been made.
+  Estimates are sensitive to clothing, pose and framing; front-only estimates
+  are always low confidence.
+- **Generic demo size charts**, the same for every product; shoe sizes are
+  entered by the customer.
+- **Support uses polling** (every 4 s on an open conversation), not push; no
+  email/SMS/push notifications.
+- **Process-local state**: rate limits and session-refresh coordination live in
+  one API/Next.js process.
+- **No uploads**: admin product photos are existing static files (metadata
+  only); returns have no photo evidence; chat is text-only.
+- **Favorites** last for the current visit only.
+- No password reset, email verification, promotions engine, reviews, or native
+  mobile app.
+- Accessibility was checked with automated tools (axe) and keyboard tests;
+  no screen-reader user testing. Browser automation covered Chromium only.
 
-| Area | Status |
-| --- | --- |
-| Repository structure and docs | Done (Task 001) |
-| Backend skeleton, health endpoint, CORS | Done (Task 001) |
-| Database connection and Alembic setup | Done (Task 001), no tables yet |
-| Desktop storefront homepage (mock data) | Done (Task 002) |
-| Catalog, product pages, frontend cart and favorites (mock data) | Done (Task 003) |
-| Catalog database, seed and REST API (`/api/v1/products`, `/categories`) | Done (Task 004) |
-| Storefront reads the catalog API (no frontend mock catalog) | Done (Task 005) |
-| Customer accounts: register, login, logout, profile, password change | Done (Task 006) |
-| Addresses, saved cart, checkout (demo payments), orders and status tracking | Done (Task 007) |
-| Admin dashboard: products, categories, variants, images, inventory, order fulfilment, demo payment states | Done (Task 008) |
-| Visual search by photo and visually similar products (pretrained OpenCLIP embeddings) | Done (Task 009); real-model quality check pending (weights must be downloaded first) |
-| Smart Fit: height + guided photos → estimated sizes → customer confirms → Fit Profile and product recommendations (pretrained MediaPipe pose model) | Done (Task 010); real-world accuracy not yet validated against tape measurements |
-| Returns (eligibility, quantities, state machine, restocking, demo refunds) and customer support conversations (polling) | Done (Task 011); no photo evidence or chat attachments yet |
-| Real payments, courier integration, image upload, saved favorites, notifications | Not started |
+## Future work
+
+- MTN MoMo / Orange Money and card payment integrations (with real refunds)
+- Courier APIs for delivery quotes, tracking and return pickup
+- Validating Smart Fit with measured volunteers; brand-specific size charts
+- Object storage for admin photo uploads and return evidence
+- Email/SMS/push notifications
+- Shared rate limiting and production observability for several workers
+- A native mobile app on the same API
+
+## Project rules
+
+See [CLAUDE.md](CLAUDE.md) (coding rules) and the Figma design:
+https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8

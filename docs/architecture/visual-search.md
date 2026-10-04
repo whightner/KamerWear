@@ -196,11 +196,27 @@ These are indications, not guarantees; a laptop will differ.
   product similarity, errors (no fallback), rate limiting, privacy and admin
   authorisation. An optional test runs the real OpenCLIP adapter (random
   weights) to check preprocessing, 512-d normalised output and CPU speed.
-- **Real-model quality check:** not yet done. In the development container,
-  `huggingface.co` was blocked by the network policy, so the pretrained
-  weights could not be downloaded. Run `python -m app.ai.evaluate_visual_search`
-  after preparing the model to record real results (sneaker, hoodie, bag,
-  trousers and t-shirt queries, original and transformed photos).
+- **Real-model quality check: still pending (re-attempted 2026-10-04, Task 012).**
+  `huggingface.co` (and `download.pytorch.org`) were still blocked by the
+  development environment's network policy (proxy answered 403), so the
+  pretrained ViT-B-32 / laion2b_s34b_b79k weights could not be downloaded and
+  no real search could be run. What *is* verified: the architecture, the UI
+  and API flows, the index logic and ranking with the deterministic test
+  encoder, the real OpenCLIP model architecture with random weights (shape,
+  normalisation, CPU timing), and the unavailable/fail-closed behaviour.
+  No result quality is claimed. On a machine with internet access run:
+
+  ```bash
+  pip install -r requirements-visual-search.txt
+  python -m app.ai.prepare_visual_search
+  python -m app.ai.visual_search_index
+  python -m app.ai.evaluate_visual_search   # sneaker, hoodie, bag, trousers, tee; resize, crop, JPEG, padded screenshot
+  ```
+
+  and record, for each query, the top 5 products, the predicted type, the
+  search time and whether the expected type appears near the top. The type
+  guard threshold (0.5) and the weak-match threshold (0.55) are untuned
+  heuristics until then.
 
 ## Limitations
 

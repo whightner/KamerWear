@@ -38,3 +38,14 @@ def test_cors_ignores_unknown_origin() -> None:
     response = TestClient(app).get("/api/v1/health", headers={"Origin": "https://evil.example"})
 
     assert "access-control-allow-origin" not in response.headers
+
+
+@pytest.mark.parametrize(
+    "secret", ["CHANGE_ME_TO_A_LONG_RANDOM_SECRET_PLEASE_CHANGE", "too-short-secret"]
+)
+def test_weak_or_placeholder_jwt_secret_is_rejected(
+    monkeypatch: pytest.MonkeyPatch, secret
+) -> None:
+    monkeypatch.setenv("JWT_SECRET_KEY", secret)
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)

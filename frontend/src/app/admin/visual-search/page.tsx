@@ -20,7 +20,12 @@ function PathList({ title, paths, hint }: { title: string; paths: string[]; hint
         {title} ({paths.length})
       </h3>
       <p className="text-xs text-muted">{hint}</p>
-      <ul className="mt-2 max-h-48 overflow-y-auto rounded-lg bg-cream/60 p-2 font-mono text-xs text-ink">
+      {/* Scrollable, so it must be reachable with the keyboard. */}
+      <ul
+        tabIndex={0}
+        aria-label={title}
+        className="mt-2 max-h-48 overflow-y-auto rounded-lg bg-cream/60 p-2 font-mono text-xs text-ink outline-none focus-visible:ring-2 focus-visible:ring-ink"
+      >
         {paths.map((path) => (
           <li key={path} className="break-all py-0.5">
             {path}
