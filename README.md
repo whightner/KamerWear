@@ -1,89 +1,102 @@
 # KamerWear
 
-**KamerWear v1.0.0-demo** is an academic/demo MVP of a fashion e-commerce
-platform for Cameroon: shoes, clothes and accessories, priced in **XAF (FCFA)**,
-with delivery to Cameroonian cities, an admin back office and two AI-assisted
-features (visual search and Smart Fit). It was built in two weeks as a school
-project. The code favours clarity and reliability over cleverness. It is not a
-production-certified shop: payments and couriers are simulated.
+<p align="center">
+  <strong>Intelligent fashion e-commerce for Cameroon</strong><br/>
+  Catalog · Smart Fit · Visual Search · Orders · Returns · Support · Admin
+</p>
 
-## The problem
+<p align="center">
+  <img alt="Demo" src="https://img.shields.io/badge/status-v1.0.0--demo-1f1f1f">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-f2b632">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-black">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-Python-009688">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-18-336791">
+</p>
 
-Online fashion shoppers in Cameroon often can't try items on, describe what
-they want in words, or easily follow and return orders. KamerWear explores:
+> **Academic/demo MVP.** KamerWear is not a production-certified store. Payments, refunds and courier operations are simulated. Visual Search and Smart Fit are prototypes with documented limitations.
 
-- **finding products from a photo** (visual search), instead of guessing keywords;
-- **estimating a clothing size** from the customer's height and two guided
-  photos (Smart Fit), always confirmed by the customer;
-- a complete, trustworthy order flow: server-calculated totals, tracking,
-  returns and support conversations;
-- a simple back office for a small store team.
+KamerWear is a full-stack fashion-commerce platform focused on clothing, shoes and accessories priced in **XAF (FCFA)**. It combines a complete shopping flow with store administration and two AI-assisted experiences: image-based product discovery and guided size recommendations.
+
+## Preview
+
+<p align="center">
+  <img src="docs/screenshots/01-home.jpg" width="49%" alt="KamerWear storefront homepage">
+  <img src="docs/screenshots/02-catalog.jpg" width="49%" alt="KamerWear product catalog">
+</p>
+<p align="center">
+  <img src="docs/screenshots/03-product-smart-fit.jpg" width="49%" alt="Product page with Smart Fit">
+  <img src="docs/screenshots/10-admin-dashboard.jpg" width="49%" alt="KamerWear admin dashboard">
+</p>
+
+More screenshots are available in [docs/screenshots/](docs/screenshots/).
+
+## What problem does it explore?
+
+Online fashion customers may struggle to describe an item they saw, choose a suitable size without trying it on, or follow after-sales processes consistently. KamerWear explores a locally oriented workflow with:
+
+- **Visual Search** — upload/take a photo and search the catalog by image similarity.
+- **Smart Fit** — guided photos + known height produce an estimated clothing-size recommendation that the customer reviews and confirms.
+- **Commerce fundamentals** — catalog, variants, inventory, cart, checkout, orders, tracking, returns and support.
+- **Store operations** — products, categories, stock, fulfilment, returns, support and visual-search indexing from an admin back office.
 
 ## Features
 
-| Customers | Store staff (`/admin`) |
+| Customer experience | Store administration |
 | --- | --- |
-| Registration, login, profile, password change | Dashboard (orders, stock, returns and support badges) |
-| Delivery addresses across Cameroon | Products, categories, variants, image metadata |
-| Catalog with search, filters, sorting | Inventory (on-hand stock; reserved is order-controlled) |
-| Product pages with colour/size variants and live stock | Order fulfilment with a strict state machine |
-| Favorites (current visit) | Manual (demo) payment states |
-| Cart saved to the account; guest cart merged at login | Returns: approve/reject, receive with per-item restock, demo refund |
-| Checkout with server-calculated delivery fee and total | Support conversations with customers |
-| Order history and tracking timeline | Visual search index status and rebuild |
-| **Visual search** by photo and "Find Similar" | |
-| **Smart Fit** size recommendations (review and confirm) | |
-| Returns within 7 days of delivery | |
-| Support conversations (optionally about an order/return) | |
-
-Screenshots of the clean demo data are in [docs/screenshots/](docs/screenshots/).
+| Registration, login and profile | Operational dashboard |
+| Cameroon delivery addresses | Products, categories and variants |
+| Search, filters and sorting | Product image metadata |
+| Colour/size variants with live stock | Inventory and low-stock views |
+| Persistent account cart + guest merge | Order fulfilment state machine |
+| Server-calculated checkout | Manual **demo** payment states |
+| Order history and tracking timeline | Return processing and restocking |
+| Smart Fit recommendations | Customer support conversations |
+| Visual Search / Find Similar | Visual-search index status/rebuild |
+| Returns within the demo policy | Role-protected admin routes |
+| Customer support conversations | |
 
 ## Architecture
 
-A **modular monolith**: one Next.js web app, one FastAPI API, one PostgreSQL
-database; the pretrained AI models run inside the API process.
+KamerWear is intentionally a **modular monolith**: one web application, one API and one PostgreSQL database.
 
+```text
+Browser
+  │
+  ▼
+Next.js 16 / React 19
+  │  Server Actions / BFF
+  ▼
+FastAPI  /api/v1
+  ├── PostgreSQL 18
+  ├── OpenCLIP ViT-B-32   (optional Visual Search)
+  └── MediaPipe Pose      (optional Smart Fit)
 ```
-Browser ──► Next.js (pages, Server Actions, small BFF) ──REST /api/v1──► FastAPI
-                                                                   ├── PostgreSQL 18
-                                                                   ├── OpenCLIP ViT-B-32  (visual search)
-                                                                   └── MediaPipe Pose     (Smart Fit)
-```
 
-The browser only talks to Next.js; tokens stay in HttpOnly cookies; all
-business rules (prices, stock, eligibility, sizes) live in the API, so a future
-mobile app could reuse it.
+The browser does not receive raw auth tokens. Next.js stores access/refresh tokens in HttpOnly cookies and calls FastAPI. Business rules such as prices, stock, order ownership, return eligibility and admin authorization are enforced by the API.
 
-| Document | Content |
-| --- | --- |
-| [docs/architecture/overview.md](docs/architecture/overview.md) | Final architecture, modules, request flow |
-| [docs/architecture/](docs/architecture/) | Auth, commerce, admin, visual search, Smart Fit, returns & support |
-| [docs/database/er.md](docs/database/er.md) | Entity–relationship overview (24 tables) |
-| [docs/api/inventory.md](docs/api/inventory.md) | Endpoint inventory; details in [docs/api/README.md](docs/api/README.md) |
-| [docs/security-privacy.md](docs/security-privacy.md) | Security review, authorization matrix, data inventory, audits |
-| [docs/demo/README.md](docs/demo/README.md) | Demo preparation, startup, health check, recovery, demo paths |
-| [docs/qa-report.md](docs/qa-report.md) | Final QA results (tests, accessibility, performance, validation status) |
-| [docs/release-notes.md](docs/release-notes.md) | v1.0.0-demo release notes |
-| [docs/development/](docs/development/) | Project coding rules and the AI-assistant instruction files used during development |
+## Technology stack
 
-## Stack
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4, ESLint
+- **Backend:** Python, FastAPI, Pydantic 2, SQLAlchemy 2, psycopg 3, Alembic, Uvicorn
+- **Auth:** Argon2id password hashing, PyJWT, rotating refresh sessions
+- **Database:** PostgreSQL 18
+- **AI (optional):** MediaPipe Pose; OpenCLIP + PyTorch
+- **Quality:** pytest, ruff, Playwright-based browser flows, axe-core accessibility checks
 
-- **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, ESLint
-- **Backend**: Python 3.14 (3.11+ should work; developed and tested on 3.14.8),
-  FastAPI, Uvicorn, Pydantic 2, SQLAlchemy 2, psycopg 3, Alembic, Argon2id, PyJWT
-- **Database**: PostgreSQL 18 (tested on 18.4)
-- **AI (optional)**: open_clip + PyTorch (visual search), MediaPipe (Smart Fit)
-- **Tests**: pytest, ruff; Playwright + axe-core were used for browser checks
+## Quick start
 
-## Setup from zero
+### Prerequisites
 
-Prerequisites: Git, Python 3.11+ (3.14 tested), PostgreSQL 18, Node.js 20.9+
-with npm.
+- Git
+- Python 3.11+ (developed/tested on Python 3.14)
+- PostgreSQL 18
+- Node.js 20.9+ and npm
 
 ### 1. Clone and create the database
 
 ```bash
-git clone <repository-url> KamerWear && cd KamerWear
+git clone https://github.com/whightner/KamerWear.git
+cd KamerWear
 psql -U postgres -c "CREATE DATABASE kamerwear;"
 ```
 
@@ -92,34 +105,46 @@ psql -U postgres -c "CREATE DATABASE kamerwear;"
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate                # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements.txt          # add requirements-dev.txt for tests and lint
-cp .env.example .env                     # Windows: copy .env.example .env
+
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+# source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-Edit `backend/.env`: put your PostgreSQL password in `DATABASE_URL` and a
-random `JWT_SECRET_KEY`
-(`python -c "import secrets; print(secrets.token_urlsafe(48))"`). Placeholders
-are refused at startup.
+Copy the environment template:
 
-```bash
-alembic upgrade head                     # create all tables
+```powershell
+Copy-Item .env.example .env
 ```
 
-Then either load the **demo presentation data** (recommended; deletes users and
-orders, see [docs/demo/README.md](docs/demo/README.md)):
+On macOS/Linux:
 
 ```bash
-export DEMO_ADMIN_EMAIL=... DEMO_ADMIN_PASSWORD=...            # your choice, ≥ 10 characters
-export DEMO_CUSTOMER_EMAIL=... DEMO_CUSTOMER_PASSWORD=...
-python -m app.db.reset_demo --yes
+cp .env.example .env
 ```
 
-or only the catalog, plus an admin you type in:
+Edit `backend/.env`. At minimum, configure:
+
+```env
+DATABASE_URL=postgresql+psycopg://postgres:YOUR_POSTGRES_PASSWORD@localhost:5432/kamerwear
+JWT_SECRET_KEY=YOUR_LONG_RANDOM_SECRET
+```
+
+Generate a JWT secret with:
 
 ```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Apply migrations and seed the catalog:
+
+```bash
+alembic upgrade head
 python -m app.db.seed
-python -m app.db.create_admin
 ```
 
 Start the API:
@@ -128,120 +153,167 @@ Start the API:
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-API docs: http://localhost:8000/docs · health: http://localhost:8000/api/v1/health
+API documentation: **http://localhost:8000/docs**
 
-### 3. Frontend
+### 3. Create an administrator
+
+Public registration creates **CUSTOMER** accounts only. Admin accounts are intentionally created from the backend CLI.
+
+From `backend/` with the virtual environment active:
+
+```bash
+python -m app.db.create_admin
+```
+
+Follow the prompts for the administrator name, email and password.
+
+Then log in at **http://localhost:3000/login** and open:
+
+**http://localhost:3000/admin**
+
+> Never commit admin passwords, PostgreSQL passwords, JWT secrets, API keys or real `.env` files.
+
+### 4. Frontend
+
+In a second terminal:
 
 ```bash
 cd frontend
 npm ci
-echo "NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1" > .env.local
-npm run build && npm run start           # production build on http://localhost:3000
-# or for development: npm run dev
 ```
 
-Open **http://localhost:3000** (use `localhost`: auth cookies are Secure in
-production builds, which browsers allow on localhost).
+Create `frontend/.env.local`:
 
-### 4. AI models (optional, internet needed once)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
+
+Start development:
+
+```bash
+npm run dev
+```
+
+or verify/run the production build:
+
+```bash
+npm run build
+npm run start
+```
+
+Open **http://localhost:3000**.
+
+## Presentation/demo dataset
+
+A guarded reset command can build a deterministic presentation dataset:
 
 ```bash
 cd backend
-pip install -r requirements-smart-fit.txt       # Linux: sudo apt-get install libegl1 libgles2
-python -m app.ai.prepare_smart_fit              # 30 MB, SHA-256 verified, self-test
-pip install -r requirements-visual-search.txt   # PyTorch + open_clip
-python -m app.ai.prepare_visual_search          # ~600 MB from Hugging Face, self-test
-python -m app.ai.visual_search_index            # encode the catalog photos
+python -m app.db.reset_demo --yes
+```
 
-# before a presentation, verify without network:
+Demo credentials come from `DEMO_*` environment variables and are **never hardcoded**. The reset command refuses unsafe environments. See [docs/demo/README.md](docs/demo/README.md) before using it.
+
+## Optional AI setup
+
+### Smart Fit
+
+```bash
+cd backend
+pip install -r requirements-smart-fit.txt
+python -m app.ai.prepare_smart_fit
 python -m app.ai.prepare_smart_fit --offline
-python -m app.ai.prepare_visual_search --offline   # then set VISUAL_SEARCH_OFFLINE=true
 ```
 
-Without them the shop works normally; the two features say they are
-unavailable and never show fake results.
+Smart Fit uses a pretrained MediaPipe Pose model. Customer body photos are processed temporarily and are not stored.
 
-### 5. Check everything
+### Visual Search
 
 ```bash
 cd backend
-python -m app.demo.healthcheck          # database, API, web, logins, visual index, Smart Fit model
-python -m app.db.check_integrity        # inventory/order/return/support invariants
+pip install -r requirements-visual-search.txt
+python -m app.ai.prepare_visual_search
+python -m app.ai.visual_search_index
+python -m app.ai.prepare_visual_search --offline
 ```
+
+Visual Search uses OpenCLIP embeddings. The real OpenCLIP weights could not be validated in the original cloud development environment because the model host was blocked, so real-weight search quality remains an explicit validation item.
+
+Without optional AI dependencies, the rest of KamerWear continues to work and the unavailable AI feature reports that state instead of showing fake results.
 
 ## Testing
 
-```bash
-cd backend && pip install -r requirements-dev.txt
-pytest                                  # uses a separate kamerwear_test database (created automatically)
-ruff check app tests          # settings in backend/ruff.toml
+Backend:
 
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
+ruff check app tests
+```
+
+Frontend:
+
+```bash
 cd frontend
+npm ci
 npm run lint
 npm run build
 ```
 
-Database tests are skipped if PostgreSQL isn't reachable. Optional tests for
-the real models skip when their packages or weights are missing. Final
-results are in [docs/qa-report.md](docs/qa-report.md).
+The final demo release recorded **543 passing backend tests, 0 failures and 1 optional OpenCLIP skip**, plus extensive Chromium browser-flow, responsive and automated accessibility checks. See [docs/qa-report.md](docs/qa-report.md) for the exact release evidence and limitations.
 
-## Security and privacy highlights
+## Security & privacy highlights
 
-- Argon2id passwords; short-lived JWTs; single-use rotating refresh tokens
-  with reuse detection; logout and password change revoke sessions.
-- Tokens only in HttpOnly SameSite=Lax cookies; Server Actions and the
-  cookie-authenticated route handlers check the request origin.
-- Every resource is owner-checked by the API (another customer's order,
-  return or conversation answers 404); all admin routes require the ADMIN role.
-- Prices, totals, fees, stock, refunds and roles are never accepted from the
-  browser.
-- No raw HTML is rendered; uploads are validated by content, size and
-  dimensions, decoded in memory, stripped of EXIF and never stored.
-- Stored personal data: account, profile, addresses, orders, returns, support
-  messages, confirmed Fit Profile. Not stored: search photos, body photos,
-  payment card data or PINs.
+- Argon2id password hashing.
+- Short-lived access JWTs and rotating single-use refresh tokens backed by revocable sessions.
+- HttpOnly, SameSite cookies for browser authentication.
+- Server-side ownership checks for addresses, carts, orders, returns and support conversations.
+- ADMIN authorization is enforced by FastAPI, not only by the UI.
+- Prices, totals, stock, delivery fees and roles are recalculated/validated server-side.
+- Uploaded AI images are validated by content and dimensions, stripped of EXIF and not retained.
+- No card numbers, CVVs or Mobile Money PINs are requested or stored.
 
-Details: [docs/security-privacy.md](docs/security-privacy.md).
+Read the full review in [docs/security-privacy.md](docs/security-privacy.md). Security reports should follow [SECURITY.md](SECURITY.md).
+
+## Documentation
+
+| Document | Purpose |
+| --- | --- |
+| [Architecture overview](docs/architecture/overview.md) | Final system/module architecture |
+| [Architecture docs](docs/architecture/) | Auth, commerce, Smart Fit, Visual Search, returns/support |
+| [ER overview](docs/database/er.md) | Main entities and relationships |
+| [API inventory](docs/api/inventory.md) | Endpoint inventory |
+| [Demo guide](docs/demo/README.md) | Reset, startup, health check, recovery |
+| [QA report](docs/qa-report.md) | Release tests, accessibility, performance |
+| [Release notes](docs/release-notes.md) | v1.0.0-demo notes |
+| [Development guidelines](docs/development/) | Project/agent development notes |
 
 ## Known limitations
 
-- **Payments are simulated**: Mobile Money, card and cash on delivery are demo
-  choices; payment and refund states are recorded manually by staff.
-- **No courier integration**: delivery fees are a flat demo rule per city;
-  statuses are updated by staff; no return pickup.
-- **Visual search real-weight validation is pending**: the pretrained
-  OpenCLIP weights could not be downloaded in the development environment
-  (Hugging Face blocked), so result quality with the real model is unverified;
-  thresholds are untuned.
-- **Smart Fit accuracy is unvalidated**: the real pose model runs, but no
-  comparison with tape measurements on consenting volunteers has been made.
-  Estimates are sensitive to clothing, pose and framing; front-only estimates
-  are always low confidence.
-- **Generic demo size charts**, the same for every product; shoe sizes are
-  entered by the customer.
-- **Support uses polling** (every 4 s on an open conversation), not push; no
-  email/SMS/push notifications.
-- **Process-local state**: rate limits and session-refresh coordination live in
-  one API/Next.js process.
-- **No uploads**: admin product photos are existing static files (metadata
-  only); returns have no photo evidence; chat is text-only.
-- **Favorites** last for the current visit only.
-- No password reset, email verification, promotions engine, reviews, or native
-  mobile app.
-- Accessibility was checked with automated tools (axe) and keyboard tests;
-  no screen-reader user testing. Browser automation covered Chromium only.
+- Payments and refunds are simulated/manual; no real payment gateway is connected.
+- No courier API or live GPS delivery tracking.
+- OpenCLIP real-weight search quality still requires real-model validation.
+- Smart Fit real-world measurement accuracy has not been validated against tape-measure ground truth.
+- Generic demo size charts are used instead of brand-specific charts.
+- Support uses lightweight polling rather than push/WebSockets.
+- Process-local rate limits/refresh coordination assume a single process.
+- Product/admin uploads and return-photo evidence need a production object-storage layer.
+- Favorites are session/current-visit only.
+- Automated browser QA covered Chromium; no formal screen-reader user study was performed.
 
-## Future work
+## Contributing
 
-- MTN MoMo / Orange Money and card payment integrations (with real refunds)
-- Courier APIs for delivery quotes, tracking and return pickup
-- Validating Smart Fit with measured volunteers; brand-specific size charts
-- Object storage for admin photo uploads and return evidence
-- Email/SMS/push notifications
-- Shared rate limiting and production observability for several workers
-- A native mobile app on the same API
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) when participating in the project.
 
-## Project rules
+For vulnerabilities, **do not open a public issue**; follow [SECURITY.md](SECURITY.md).
 
-See [docs/development/](docs/development/) (coding rules) and the Figma design:
-https://www.figma.com/design/m6VMrJxXlWVUdAYCo3w3N8
+## License
+
+KamerWear's original source code is released under the [MIT License](LICENSE).
+
+Third-party libraries, model weights and bundled demo imagery keep their own licenses/terms. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [frontend/public/images/CREDITS.md](frontend/public/images/CREDITS.md).
+
+---
+
+**KamerWear v1.0.0-demo** — academic/demo software, not production certification.
